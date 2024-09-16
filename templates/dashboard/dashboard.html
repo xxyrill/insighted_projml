@@ -1,0 +1,119 @@
+{% extends 'components/layouts.html' %}
+
+{% block content %}
+<div class="container-fluid pt-4">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card shadow rounded d-flex justify-content-center align-items-center">
+        <div class="card-body w-100">
+          <div class="container-fluid text-center">
+            <h5 class="card-title text-center font-weight-bold">Filters</h5>
+            <!-- Filter Form -->
+            <form>
+              <!-- Graph Select -->
+              <div class="form-group">
+                <label for="graph">Graph:</label>
+                <select class="form-control" id="graph">
+                  <option value="all">All Graph</option>
+                  <option value="ratings_trend">Ratings Trend</option>
+                  <option value="department_avg_ratings">Department Average Ratings</option>
+                  <option value="rating_distribution">Rating Distribution</option>
+                  <option value="word_clouds">Word Clouds</option>
+                  <option value="comment_lengths">Comment Lengths</option>
+                  <option value="ratings_by_course">Ratings by Course</option>
+                  <option value="correlation_heatmap">Correlation by Heatmap</option>
+                  <option value="performance_year_department">Performance by Year and Department</option>       
+                  <option value="sentiment_over_time">Sentiment Over Time</option>
+                  <option value="instructor_performance_time">Instructor Performance Over Time</option>
+                  <option value="pareto_analysis">Pareto Analysis</option>  
+                  <option value="ratings_vs_comment_length">Ratings VS Comment Length</option>
+                  <option value="instructor_comparison_dashboard">Instructor Comparison Dashboard</option>
+                </select>
+              </div>
+              <!-- Term Select -->
+              <div class="form-group">
+                <label for="term">Term:</label>
+                <select class="form-control" id="term">
+                  <option>All Terms</option>
+                  <option>Spring 2024</option>
+                  <option>Fall 2023</option>
+                  <!-- Add more options as needed -->
+                </select>
+              </div>
+              <!-- Department Select -->
+              <div class="form-group">
+                <label for="department">Department:</label>
+                <select class="form-control" id="department">
+                  <option>All Departments</option>
+                  <option>Computer Science</option>
+                  <option>Mathematics</option>
+                  <!-- Add more options as needed -->
+                </select>
+              </div>
+              <!-- Instructor Select -->
+              <div class="form-group">
+                <label for="instructor">Instructor:</label>
+                <select class="form-control" id="instructor">
+                  <option>All Instructors</option>
+                  <option>Dr. Smith</option>
+                  <option>Prof. Johnson</option>
+                  <!-- Add more options as needed -->
+                </select>
+              </div>
+              <!-- Course Select -->
+              <div class="form-group">
+                <label for="course">Course:</label>
+                <select class="form-control" id="course">
+                  <option>All Courses</option>
+                  <option>Intro to Programming</option>
+                  <option>Data Structures</option>
+                  <!-- Add more options as needed -->
+                </select>
+              </div>
+              <!-- Filter and Clear Filters Buttons -->
+              <div class="d-flex justify-content-between">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  style="width: 10rem"
+                >
+                  Filter
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  style="width: 10rem"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </form>
+            <!-- Upload and View Data Buttons -->
+            <div class="mt-4 text-center">
+              {% if user_type == 'VPAA' %}
+              <button type="button" class="btn btn-primary btn-block">
+                Upload Data
+              </button>
+              {% endif %}
+              <button type="button" class="btn btn-primary btn-block mt-2">
+                View Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card shadow rounded">
+        <div class="card-body">
+            <div class="container-fluid">
+                
+            </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

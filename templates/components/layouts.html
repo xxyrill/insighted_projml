@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"
+      name="viewport"
+    />
+    <title>Dashboard</title>
+
+    <!-- General CSS Files -->
+    <!--  -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/modules/bootstrap/css/bootstrap.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'assets/modules/fontawesome/css/all.min.css' %}"
+    />
+
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="{% static 'assets/css/styling.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/components.css' %}" />
+  </head>
+  <body id="body-pd">
+    <div class="page-inner">
+      <div>
+        <header class="header" id="header">
+          <div class="header_toggle">
+            <i class="bx bx-menu" id="header-toggle"></i>
+          </div>
+          <div class="header_img">
+            <img src="https://i.imgur.com/hczKIze.jpg" alt="" />
+          </div>
+        </header>
+        <div class="l-navbar" id="nav-bar">
+          <nav class="nav">
+            <div>
+              <a href="#" class="nav_logo">
+                <i class="bx bx-layer nav_logo-icon"></i>
+                <span class="nav_logo-name">InsightED</span>
+              </a>
+              <div class="nav_list">
+                <a href="{% url 'home' %}" class="nav_link {% if request.path == '' %} active {% endif %}">
+                  <i class="bx bx-grid-alt nav_icon"></i>
+                  <span class="nav_name">Home</span>
+                </a>
+                <a href="{% url 'dashboard' %}" class="nav_link {% if request.path == 'dashboard/' %} active {% endif %}">
+                  <i class="bx bx-user nav_icon"></i>
+                  <span class="nav_name">Dashboard</span>
+                </a>
+                <a href="#" class="nav_link">
+                  <i class="bx bx-message-square-detail nav_icon"></i>
+                  <span class="nav_name">About Us</span>
+                </a>
+                <a href="#" class="nav_link">
+                  <i class="bx bx-bookmark nav_icon"></i>
+                  <span class="nav_name">Admin</span>
+                </a>
+              </div>
+            </div>
+            <a href="#" class="nav_link">
+              <i class="bx bx-log-out nav_icon"></i>
+              <span class="nav_name">Log Out</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="page-inner">
+      <!--Container Main start-->
+      {% block content %} 
+      {% endblock %}
+      </div>
+    </div>
+    <!-- General JS Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="{% static 'assets/modules/jquery.min.js' %}"></script>
+    <script src="{% static 'assets/modules/popper.js' %}"></script>
+    <script src="{% static 'assets/modules/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/stisla.js' %}"></script>
+
+    <!-- Template JS File -->
+    <script src="{% static 'assets/js/app.js' %}"></script>
+    <script src="{% static 'assets/js/scripts.js' %}"></script>
+    <script src="{% static 'assets/js/custom.js' %}"></script>
+  </body>
+</html>
