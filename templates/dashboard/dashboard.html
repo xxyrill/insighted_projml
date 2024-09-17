@@ -1,11 +1,14 @@
 {% extends 'components/layouts.html' %}
 
+{% load static %} <!-- Filter Form -->
+
 {% block content %}
 <div class="container-fluid pt-4">
   <div class="row">
+
     <div class="col-md-4">
       <div class="card shadow rounded d-flex justify-content-center align-items-center">
-        <div class="card-body w-100">
+        <div class="card-body w-100" style="height: 700px;" >
           <div class="container-fluid text-center">
             <h5 class="card-title text-center font-weight-bold">Filters</h5>
             <!-- Filter Form -->
@@ -22,14 +25,15 @@
                   <option value="comment_lengths">Comment Lengths</option>
                   <option value="ratings_by_course">Ratings by Course</option>
                   <option value="correlation_heatmap">Correlation by Heatmap</option>
-                  <option value="performance_year_department">Performance by Year and Department</option>       
+                  <option value="performance_year_department">Performance by Year and Department</option>
                   <option value="sentiment_over_time">Sentiment Over Time</option>
                   <option value="instructor_performance_time">Instructor Performance Over Time</option>
-                  <option value="pareto_analysis">Pareto Analysis</option>  
+                  <option value="pareto_analysis">Pareto Analysis</option>
                   <option value="ratings_vs_comment_length">Ratings VS Comment Length</option>
                   <option value="instructor_comparison_dashboard">Instructor Comparison Dashboard</option>
                 </select>
               </div>
+
               <!-- Term Select -->
               <div class="form-group">
                 <label for="term">Term:</label>
@@ -95,7 +99,7 @@
                 Upload Data
               </button>
               {% endif %}
-              <button type="button" class="btn btn-primary btn-block mt-2">
+              <button type="button" id="view-data-btn" class="btn btn-primary btn-block mt-2">
                 View Data
               </button>
             </div>
@@ -106,9 +110,9 @@
 
     <div class="col-md-8">
       <div class="card shadow rounded">
-        <div class="card-body">
-            <div class="container-fluid">
-                
+        <div class="card-body" style="height: 700px; overflow-y: auto;">
+            <div id="graph-container" class="container-fluid">
+
             </div>
         </div>
       </div>
@@ -116,4 +120,85 @@
 
   </div>
 </div>
+
+<!-- Pass static URLs to the HTML as data attributes -->
+<div id="graph-urls" data-ratings-trend="{% static 'assets/img/graph/plot-ratings-trend.png' %}"
+                  data-department-avg-ratings="{% static 'assets/img/graph/plot-department-avg-ratings.png' %}"
+                  data-rating-distribution="{% static 'assets/img/graph/plot-rating-distribution.png' %}"
+                  data-word-clouds="{% static 'assets/img/graph/plot-word-clouds.png' %}"
+                  data-comment-lengths="{% static 'assets/img/graph/plot-comment-lengths.png' %}"
+                  data-ratings-by-course="{% static 'assets/img/graph/plot-ratings-by-course.png' %}"
+                  data-correlation-heatmap="{% static 'assets/img/graph/plot-correlation-by-heatmap.png' %}"
+                  data-performance-year-department="{% static 'assets/img/graph/plot-performance-by-year-and-department.png' %}"
+                  data-sentiment-over-time="{% static 'assets/img/graph/plot-sentiment-over-time.png' %}"
+                  data-instructor-performance-time="{% static 'assets/img/graph/plot-instructor-performance-over-time.png' %}"
+                  data-pareto-analysis="{% static 'assets/img/graph/plot-pareto-analysis.png' %}"
+                  data-ratings-vs-comment-length="{% static 'assets/img/graph/plot-ratings-vs-comment-length.png' %}"
+                  data-instructor-comparison-dashboard="{% static 'assets/img/graph/plot-instructor-comparison-dashboard.png' %}"
+>
+                  
+</div>
+
+<script>
+  // Get static URLs from the data attributes
+  const graphUrls = document.getElementById('graph-urls').dataset;
+
+  const graphImages = {
+      'ratings_trend': graphUrls.ratingsTrend,
+      'department_avg_ratings': graphUrls.departmentAvgRatings,
+      'rating_distribution': graphUrls.ratingDistribution,
+      'word_clouds': graphUrls.wordClouds,
+      'comment_lengths': graphUrls.commentLengths,
+      'ratings_by_course': graphUrls.ratingsByCourse,
+      'correlation_heatmap': graphUrls.correlationHeatmap,
+      'performance_year_department': graphUrls.performanceYearDepartment,
+      'sentiment_over_time': graphUrls.sentimentOverTime,
+      'instructor_performance_time': graphUrls.instructorPerformanceTime,
+      'pareto_analysis': graphUrls.paretoAnalysis,
+      'ratings_vs_comment_length': graphUrls.ratingsVsCommentLength,
+      'instructor_comparison_dashboard': graphUrls.instructorComparisonDashboard
+  };
+
+  document.getElementById('view-data-btn').addEventListener('click', function () {
+    // Get the selected graph type from the dropdown
+    var graphType = document.getElementById('graph').value;
+
+    // Get the container where the image will be displayed
+    var graphContainer = document.getElementById('graph-container');
+
+    // Clear the container content
+    graphContainer.innerHTML = '';
+
+    // Check if the selected graph type has a corresponding image
+  if (graphType === 'all') {
+        Object.keys(graphImages).forEach(function (key) {
+            // Create an image element for each graph
+            var img = document.createElement('img');
+            img.src = graphImages[key];
+            img.alt = key.replace(/_/g, ' ') + ' Graph';  // Set the alt text
+            img.style.width = '100%';  // Set the width to 100% for responsiveness
+            img.classList.add('mb-3');  // Add margin-bottom to space out the graphs
+
+            // Append each image to the container
+            graphContainer.appendChild(img);
+        });
+    } else {
+        // Check if the selected graph type has a corresponding image
+        if (graphImages[graphType]) {
+            // Create an image element and set the source to the corresponding image
+            var img = document.createElement('img');
+            img.src = graphImages[graphType];
+            img.alt = graphType.replace(/_/g, ' ') + ' Graph';  // Set the alt text
+            img.style.width = '100%';  // Set the width to 100% for responsiveness
+
+            // Append the image to the container
+            graphContainer.appendChild(img);
+        } else {
+            // If no image exists for the selected graph, show a default message or image
+            graphContainer.innerHTML = '<p>No graph selected or image available for this selection.</p>';
+        }
+    }
+});
+</script>
+
 {% endblock %}
