@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, DatEntryForm
+from django.contrib import messages
 
 def register_view(request):
     if request.method == 'POST':
@@ -61,3 +62,14 @@ def dashboardgraph(request):
 
 def logout_view(request):
     return render(request, 'authentications/login.html')
+
+def upload_data(request):
+    if request.method == 'POST':
+        form = DatEntryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect (request, 'dashboard/dashboard.html')
+
+    else:
+        form = DatEntryForm()
+    return render(request, 'dashboard/upload_data.html', {'form': form})

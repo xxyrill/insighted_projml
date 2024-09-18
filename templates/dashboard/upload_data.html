@@ -1,0 +1,9 @@
+<!-- upload_data.html -->
+<form method="post" action="{% url 'upload_data' %}">
+  {% csrf_token %}
+  
+  <!-- Render the form fields automatically -->
+  {{ form.as_p }}
+  
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>

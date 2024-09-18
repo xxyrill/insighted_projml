@@ -5,7 +5,6 @@
 {% block content %}
 <div class="container-fluid pt-4">
   <div class="row">
-
     <div class="col-md-4">
       <div class="card shadow rounded d-flex justify-content-center align-items-center">
         <div class="card-body w-100" style="height: 700px;" >
@@ -17,7 +16,7 @@
               <div class="form-group">
                 <label for="graph">Graph:</label>
                 <select class="form-control" id="graph">
-                  <option value="all">All Graph</option>
+                  <option value="all">All Graphs</option>
                   <option value="ratings_trend">Ratings Trend</option>
                   <option value="department_avg_ratings">Department Average Ratings</option>
                   <option value="rating_distribution">Rating Distribution</option>
@@ -33,7 +32,6 @@
                   <option value="instructor_comparison_dashboard">Instructor Comparison Dashboard</option>
                 </select>
               </div>
-
               <!-- Term Select -->
               <div class="form-group">
                 <label for="term">Term:</label>
@@ -95,7 +93,10 @@
             <!-- Upload and View Data Buttons -->
             <div class="mt-4 text-center">
               {% if user_type == 'VPAA' %}
-              <button type="button" class="btn btn-primary btn-block">
+              <button type="button"
+                      class="btn btn-primary btn-block"
+                      data-toggle="modal"
+                      data-target="#uploadDataModal">
                 Upload Data
               </button>
               {% endif %}
@@ -107,20 +108,38 @@
         </div>
       </div>
     </div>
+  
 
     <div class="col-md-8">
       <div class="card shadow rounded">
         <div class="card-body" style="height: 700px; overflow-y: auto;">
             <div id="graph-container" class="container-fluid">
-
             </div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
+    
+<!-- Upload Data Modal -->
+<div class="modal fade" id="uploadDataModal" tabindex="-1" role="dialog" aria-labelledby="uploadDataModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadDataModalLabel">Upload Data</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Include the form here -->
+        {% include 'dashboard/upload_data.html' %}
+      </div>
+    </div>
+  </div>
+</div>    
 
+<!-- GETTING THE GRAPH IMAGE -->
 <!-- Pass static URLs to the HTML as data attributes -->
 <div id="graph-urls" data-ratings-trend="{% static 'assets/img/graph/plot-ratings-trend.png' %}"
                   data-department-avg-ratings="{% static 'assets/img/graph/plot-department-avg-ratings.png' %}"
@@ -136,14 +155,15 @@
                   data-ratings-vs-comment-length="{% static 'assets/img/graph/plot-ratings-vs-comment-length.png' %}"
                   data-instructor-comparison-dashboard="{% static 'assets/img/graph/plot-instructor-comparison-dashboard.png' %}"
 >
-                  
+
 </div>
 
 <script>
-  // Get static URLs from the data attributes
-  const graphUrls = document.getElementById('graph-urls').dataset;
+  document.addEventListener('DOMContentLoaded', function () {
+    // Get the static URLs from the data attributes
+    const graphUrls = document.getElementById('graph-urls').dataset;
 
-  const graphImages = {
+    const graphImages = {
       'ratings_trend': graphUrls.ratingsTrend,
       'department_avg_ratings': graphUrls.departmentAvgRatings,
       'rating_distribution': graphUrls.ratingDistribution,
@@ -157,48 +177,43 @@
       'pareto_analysis': graphUrls.paretoAnalysis,
       'ratings_vs_comment_length': graphUrls.ratingsVsCommentLength,
       'instructor_comparison_dashboard': graphUrls.instructorComparisonDashboard
-  };
+    };
 
-  document.getElementById('view-data-btn').addEventListener('click', function () {
-    // Get the selected graph type from the dropdown
-    var graphType = document.getElementById('graph').value;
+    function updateGraphs() {
+      var graphType = document.getElementById('graph').value;
+      var graphContainer = document.getElementById('graph-container');
+      graphContainer.innerHTML = '';
 
-    // Get the container where the image will be displayed
-    var graphContainer = document.getElementById('graph-container');
-
-    // Clear the container content
-    graphContainer.innerHTML = '';
-
-    // Check if the selected graph type has a corresponding image
-  if (graphType === 'all') {
+      if (graphType === 'all') {
         Object.keys(graphImages).forEach(function (key) {
-            // Create an image element for each graph
-            var img = document.createElement('img');
-            img.src = graphImages[key];
-            img.alt = key.replace(/_/g, ' ') + ' Graph';  // Set the alt text
-            img.style.width = '100%';  // Set the width to 100% for responsiveness
-            img.classList.add('mb-3');  // Add margin-bottom to space out the graphs
-
-            // Append each image to the container
-            graphContainer.appendChild(img);
+          var img = document.createElement('img');
+          img.src = graphImages[key];
+          img.alt = key.replace(/_/g, ' ') + ' Graph';
+          img.style.width = '100%';
+          img.classList.add('mb-3');
+          graphContainer.appendChild(img);
         });
-    } else {
-        // Check if the selected graph type has a corresponding image
+      } else {
         if (graphImages[graphType]) {
-            // Create an image element and set the source to the corresponding image
-            var img = document.createElement('img');
-            img.src = graphImages[graphType];
-            img.alt = graphType.replace(/_/g, ' ') + ' Graph';  // Set the alt text
-            img.style.width = '100%';  // Set the width to 100% for responsiveness
-
-            // Append the image to the container
-            graphContainer.appendChild(img);
+          var img = document.createElement('img');
+          img.src = graphImages[graphType];
+          img.alt = graphType.replace(/_/g, ' ') + ' Graph';
+          img.style.width = '100%';
+          graphContainer.appendChild(img);
         } else {
-            // If no image exists for the selected graph, show a default message or image
-            graphContainer.innerHTML = '<p>No graph selected or image available for this selection.</p>';
+          graphContainer.innerHTML = '<p>No graph selected or image available for this selection.</p>';
         }
+      }
     }
-});
+
+    // Trigger the updateGraphs function when the page loads
+    updateGraphs();
+
+    document.getElementById('view-data-btn').addEventListener('click', updateGraphs);
+
+    // Also trigger updateGraphs when the select value changes
+    document.getElementById('graph').addEventListener('change', updateGraphs);
+  });
 </script>
 
 {% endblock %}
