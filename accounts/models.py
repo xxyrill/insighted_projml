@@ -50,7 +50,8 @@ class DatEntry(models.Model):
         MinValueValidator(-1),
         MaxValueValidator(5)
     ], default=0,
-        help_text='The instructor has set clear standards regarding their timeliness in responding to messages.')
+        help_text='The instructor has set clear standards regarding '
+                  'their timeliness in responding to messages.')
     question_2 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)

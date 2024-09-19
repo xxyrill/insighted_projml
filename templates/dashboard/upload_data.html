@@ -1,72 +1,107 @@
 
-<!-- Modal Form -->
-<div class="modal fade" id="uploadDataModal" tabindex="-1" role="dialog" aria-labelledby="uploadDataModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="uploadDataModalLabel">Upload Data</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form method="post" action="{% url 'upload_data' %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <label for="survey_name">Survey Name</label>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Example</title>
+    <link rel="stylesheet" href="{% static 'assets/css/upload_data.css' %}" > 
+    <style>
+ 
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5); 
+        }
+
+        .modal-dialog {
+            position: fixed; 
+            top: 0%; 
+            left: 25%; 
+            transform: translate(-50%, -50%);
+            width: 100%;
+            max-width: 600px; 
+            margin: 0; 
+        }
+
+        .modal-content {
+            width: 100%;
+        }
+
+        .modal-header, .modal-body, .modal-footer {
+            padding: 1rem; /* Add padding for better spacing */
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal Form -->
+    <div class="modal fade" id="uploadDataModal" tabindex="-1" role="dialog" aria-labelledby="uploadDataModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadDataModalLabel">Upload Data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                        {% csrf_token %}
+                        <!-- Form fields go here -->
+           <div class="form-group">
+            <label for="survey_name" style="font-size: 0.9rem; text-align: justify; display: block;">Survey Name</label>
             <input type="text" class="form-control" id="survey_name" name="survey_name" >
           </div>
           <!-- Repeat for other fields -->
           <div class="form-group">
-            <label for="date_start">Start Date</label>
+            <label for="date_start" style="font-size: 0.9rem; text-align: justify; display: block;">Start Date</label>
             <input type="date" class="form-control" id="date_start" name="date_start" >
           </div>
           <div class="form-group">
-            <label for="date_close">Date Close</label>
+            <label for="date_close" style="font-size: 0.9rem; text-align: justify; display: block;">Date Close</label>
             <input type="date" class="form-control" id="date_close" name="date_close" >
           </div>
           <div class="form-group">
-            <label for="crs_name">Course Name</label>
+            <label for="crs_name" style="font-size: 0.9rem; text-align: justify; display: block;">Course Name</label>
             <input type="text" class="form-control" id="crs_name" name="crs_name" >
           </div>
           <div class="form-group">
-            <label for="crs_year">Course Year</label>
+            <label for="crs_year" style="font-size: 0.9rem; text-align: justify; display: block;">Course Year</label>
             <input type="number" class="form-control" id="crs_year" name="crs_year" >
           </div>
           <div class="form-group">
-            <label for="dept_name">Department Name</label>
+            <label for="dept_name" style="font-size: 0.9rem; text-align: justify; display: block;">Department Name</label>
             <input type="text" class="form-control" id="dept_name" name="dept_name" >
           </div>
           <div class="form-group">
-            <label for="crs_dir">Course Director</label>
+            <label for="crs_dir" style="font-size: 0.9rem; text-align: justify; display: block;">Course Director</label>
             <input type="text" class="form-control" id="crs_dir" name="crs_dir" >
           </div>
           <div class="form-group">
-            <label for="resp_fac">Respective Facilitator</label>
+            <label for="resp_fac" style="font-size: 0.9rem; text-align: justify; display: block;">Respective Facilitator</label>
             <input type="text" class="form-control" id="resp_fac" name="resp_fac" >
           </div>
           <div class="form-group">
-            <label for="eval_uname">Evaluatee Name</label>
+            <label for="eval_uname" style="font-size: 0.9rem; text-align: justify; display: block;">Evaluatee Name</label>
             <input type="text" class="form-control" id="eval_uname" name="eval_uname" >
           </div>
           <div class="form-group">
-            <label for="eval_email">Evaluatee Email</label>
+            <label for="eval_email" style="font-size: 0.9rem; text-align: justify; display: block;">Evaluatee Email</label>
             <input type="text" class="form-control" id="eval_email" name="eval_email" >
           </div>
           <div class="form-group">
-            <label for="t_submit">Time Submit</label>
+            <label for="t_submit" style="font-size: 0.9rem; text-align: justify; display: block;">Time Submit</label>
             <input type="datetime-local" class="form-control" id="t_submit" name="t_submit" >
           </div>
           <div class="form-group">
-            <label for="mobile">Mobile</label>
+            <label for="mobile" style="font-size: 0.9rem; text-align: justify; display: block;">Mobile</label>
             <input type="tel" class="form-control" id="mobile" name="mobile" >
           </div>
           <div class="form-group">
-            <label for="grad_year">Graduation Year</label>
+            <label for="grad_year" style="font-size: 0.9rem; text-align: justify; display: block;">Graduation Year</label>
             <input type="date" class="form-control" id="grad_year" name="grad_year" >
           </div>
           <div class="form-group">
-              <label for="gender">Gender</label>
+              <label for="gender" style="font-size: 0.9rem; text-align: justify; display: block;">Gender</label>
               <select class="form-control" id="gender" name="gender" >
                   <option value="" disabled selected>Select Gender</option>
                   <option value="male">Male</option>
@@ -75,155 +110,162 @@
               </select>
           </div>
           <div class="form-group">
-            <label for="program">Program</label>
+            <label for="program" style="font-size: 0.9rem; text-align: justify; display: block;">Program</label>
             <input type="text" class="form-control" id="program" name="program" >
           </div>
           <div class="form-group">
-            <label for="research_1">Research 1</label>
+            <label for="research_1" style="font-size: 0.9rem; text-align: justify; display: block;">Research 1</label>
             <input type="text" class="form-control" id="research_1" name="research_1" >
           </div>
           <div class="form-group">
-            <label for="research_2">Research 2</label>
+            <label for="research_2" style="font-size: 0.9rem; text-align: justify; display: block;">Research 2</label>
             <input type="text" class="form-control" id="research_2" name="research_2" >
           </div>
           <div class="form-group">
-            <label for="research_3">Research 3</label>
+            <label for="research_3" style="font-size: 0.9rem; text-align: justify; display: block;">Research 3</label>
             <input type="text" class="form-control" id="research_3" name="research_3" >
           </div>
 
           <div class="form-group">
-            <label for="question_1">The instructor has set clear standards regarding their timeliness in responding to messages</label>
+            <label for="question_1" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor has set clear standards regarding their timeliness in responding to messages</label>
             <input type="number" class="form-control" id="question_1" name="question_1" >
           </div>
           <div class="form-group">
-            <label for="question_2">The instructor has provided the appropriate information and contact details for technical concerns</label>
+            <label for="question_2" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor has provided the appropriate information and contact details for technical concerns</label>
             <input type="number" class="form-control" id="question_2" name="question_2" >
           </div>
           <div class="form-group">
-            <label for="question_3">The instructor showed interest in student progress.</label>
+            <label for="question_3" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor showed interest in student progress.</label>
             <input type="number" class="form-control" id="question_3" name="question_3" >
           </div>
           <div class="form-group">
-            <label for="question_4">The instructor encourages learners to participate.</label>
+            <label for="question_4" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor encourages learners to participate.</label>
             <input type="number" class="form-control" id="question_4" name="question_4" >
           </div>
           <div class="form-group">
-            <label for="question_5">The instructor implements Small Group Discussions (Breakout Rooms).</label>
+            <label for="question_5" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor implements Small Group Discussions (Breakout Rooms).</label>
             <input type="number" class="form-control" id="question_5" name="question_5" >
           </div>
           <div class="form-group">
-            <label for="question_6">The instructor provides equal opportunities for students to share ideas and viewpoints.</label>
+            <label for="question_6" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides equal opportunities for students to share ideas and viewpoints.</label>
             <input type="number" class="form-control" id="question_6" name="question_6" >
           </div>
           <div class="form-group">
-            <label for="question_7">The instructor requires learners to participate.</label>
+            <label for="question_7" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor requires learners to participate.</label>
             <input type="number" class="form-control" id="question_7" name="question_7" >
           </div>
           <div class="form-group">
-            <label for="question_8">The instructor provides platforms for Small Group Discussions.</label>
+            <label for="question_8" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides platforms for Small Group Discussions.</label>
             <input type="number" class="form-control" id="question_8" name="question_8" >
           </div>
           <div class="form-group">
-            <label for="question_9">Tasks deployed require collaboration among students.</label>
+            <label for="question_9" style="font-size: 0.9rem; text-align: justify; display: block;">Tasks deployed require collaboration among students.</label>
             <input type="number" class="form-control" id="question_9" name="question_9" >
           </div>
           <div class="form-group">
-            <label for="question_10">The instructor interactively engages learners in a variety of instructional delivery methods.</label>
+            <label for="question_10" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor interactively engages learners in a variety of instructional delivery methods.</label>
             <input type="number" class="form-control" id="question_10" name="question_10" >
           </div>
           <div class="form-group">
-            <label for="question_11">The instructor deploys various active learning techniques (role-playing  case studies  group projects  think-pair-share  debates  etc.).</label>
+            <label for="question_11" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor deploys various active learning techniques (role-playing  case studies  group projects  think-pair-share  debates  etc.).</label>
             <input type="number" class="form-control" id="question_11" name="question_11" >
           </div>
           <div class="form-group">
-            <label for="question_12">The instructor provides students access to resources that enrich the course content.</label>
+            <label for="question_12" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides students access to resources that enrich the course content.</label>
             <input type="number" class="form-control" id="question_12" name="question_12" >
           </div>
           <div class="form-group">
-            <label for="question_13">The instructor demonstrates a thorough knowledge of the subject matter.</label>
+            <label for="question_13" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor demonstrates a thorough knowledge of the subject matter.</label>
             <input type="number" class="form-control" id="question_13" name="question_13" >
           </div>
           <div class="form-group">
-            <label for="question_14">The instructor provides examples  case studies  or problem sets that  higher-order thinking skills.</label>
+            <label for="question_14" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides examples  case studies  or problem sets that  higher-order thinking skills.</label>
             <input type="number" class="form-control" id="question_14" name="question_14" >
           </div>
           <div class="form-group">
-            <label for="question_15">The instructor explains the significance of the lessons.</label>
+            <label for="question_15" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor explains the significance of the lessons.</label>
             <input type="number" class="form-control" id="question_15" name="question_15" >
           </div>
           <div class="form-group">
-            <label for="question_16">Tasks and assessments increase their level of challenge.</label>
+            <label for="question_16" style="font-size: 0.9rem; text-align: justify; display: block;">Tasks and assessments increase their level of challenge.</label>
             <input type="number" class="form-control" id="question_16" name="question_16" >
           </div>
           <div class="form-group">
-            <label for="question_17">The instructor provides examples or models of what is expected.</label>
+            <label for="question_17" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides examples or models of what is expected.</label>
             <input type="number" class="form-control" id="question_1" name="question_1" >
           </div>
           <div class="form-group">
-            <label for="question_18">Course outcomes are clearly presented.</label>
+            <label for="question_18" style="font-size: 0.9rem; text-align: justify; display: block;">Course outcomes are clearly presented.</label>
             <input type="number" class="form-control" id="question_18" name="question_18" >
           </div>
           <div class="form-group">
-            <label for="question_19">Course deadlines are clearly set.</label>
+            <label for="question_19" style="font-size: 0.9rem; text-align: justify; display: block;">Course deadlines are clearly set.</label>
             <input type="number" class="form-control" id="question_19" name="question_19" >
           </div>
           <div class="form-group">
-            <label for="question_20">Provides reminders regarding upcoming deadlines.</label>
+            <label for="question_20" style="font-size: 0.9rem; text-align: justify; display: block;">Provides reminders regarding upcoming deadlines.</label>
             <input type="number" class="form-control" id="question_20" name="question_20" >
           </div>
           <div class="form-group">
-            <label for="question_21">The instructor provides clear guidelines and/or rubrics of the learning activities.</label>
+            <label for="question_21" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides clear guidelines and/or rubrics of the learning activities.</label>
             <input type="number" class="form-control" id="question_21" name="question_21" >
           </div>
           <div class="form-group">
-            <label for="question_22">The instructor provides Information Feedback (Evaluation of Work  Answers to Questions  Comments on Submissions).</label>
+            <label for="question_22" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides Information Feedback (Evaluation of Work  Answers to Questions  Comments on Submissions).</label>
             <input type="number" class="form-control" id="question_22" name="question_22" >
           </div>
           <div class="form-group">
-            <label for="question_23">The instructor provides Acknowledgment Feedback (acknowledges communication sent by student).</label>
+            <label for="question_23" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides Acknowledgment Feedback (acknowledges communication sent by student).</label>
             <input type="number" class="form-control" id="question_23" name="question_23" >
           </div>
           <div class="form-group">
-            <label for="question_24">The instructor returns assessments in a timely fashion.</label>
+            <label for="question_24" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor returns assessments in a timely fashion.</label>
             <input type="number" class="form-control" id="question_24" name="question_24" >
           </div>
           <div class="form-group">
-            <label for="question_25">The instructor engages students in learning activities that address a variety of learning styles and preferences.</label>
+            <label for="question_25" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor engages students in learning activities that address a variety of learning styles and preferences.</label>
             <input type="number" class="form-control" id="question_25" name="question_25" >
           </div>
           <div class="form-group">
-            <label for="question_26">The instructor adapts learning activities to accommodate student's needs.</label>
+            <label for="question_26" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor adapts learning activities to accommodate student's needs.</label>
             <input type="number" class="form-control" id="question_26" name="question_26" >
           </div>
           <div class="form-group">
-            <label for="question_27">Quality of work is praised.</label>
+            <label for="question_27" style="font-size: 0.9rem; text-align: justify; display: block;">Quality of work is praised.</label>
             <input type="number" class="form-control" id="question_27" name="question_27" >
           </div>
           <div class="form-group">
-            <label for="question_28">The instructor is effective in helping students develop their knowledge  skills  and personalities enabling them to achieve the intended learning outcomes.The instructor is effective in helping students develop their knowledge  skills  and personalities enabling them to achieve the intended learning outcomes.</label>
+            <label for="question_28" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor is effective in helping students develop their knowledge  skills  and personalities enabling them to achieve the intended learning outcomes.The instructor is effective in helping students develop their knowledge  skills  and personalities enabling them to achieve the intended learning outcomes.</label>
             <input type="number" class="form-control" id="question_28" name="question_28" >
           </div>
           <div class="form-group">
-            <label for="question_29">Course assessments are authentic and measure Higher-Order Thinking Skills.</label>
+            <label for="question_29" style="font-size: 0.9rem; text-align: justify; display: block;">Course assessments are authentic and measure Higher-Order Thinking Skills.</label>
             <input type="number" class="form-control" id="question_29" name="question_29" >
           </div>
           <div class="form-group">
-            <label for="question_30">The instructor provides sufficient attempts in the attainment of learning outcomes.</label>
+            <label for="question_30" style="font-size: 0.9rem; text-align: justify; display: block;">The instructor provides sufficient attempts in the attainment of learning outcomes.</label>
             <input type="number" class="form-control" id="question_30" name="question_30" >
           </div>
           <div class="form-group">
-            <label for="">Comments on the Instructor.</label>
+            <label for="question_31" style="font-size: 0.9rem; text-align: justify; display: block;">Comments on the Instructor.</label>
             <input type="number" class="form-control" id="question_31" name="question_31" >
-          </div> question_31
+          </div>
           <div class="form-group">
-            <label for="question_32">Comments on the Course.</label>
+            <label for="question_32" style="font-size: 0.9rem; text-align: justify; display: block;">Comments on the Course.</label>
             <input type="number" class="form-control" id="question_32" name="question_32" >
           </div>
-
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-      </div>
+                      
+                        <!-- Add remaining form fields here -->
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                    {% include 'dashboard/toaster.html' %}          
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
+
+    <script src="path/to/jquery.min.js"></script>
+    <script src="path/to/bootstrap.bundle.min.js"></script> 
+</body>
+</html>

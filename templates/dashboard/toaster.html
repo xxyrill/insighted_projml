@@ -1,0 +1,49 @@
+<!-- toaster.html -->
+<div id="successToaster" class="toaster">
+    Data has been successfully submitted!
+</div>
+
+<style>
+    /* CSS for the toaster */
+    .toaster {
+        visibility: hidden;
+        min-width: 250px;
+        background-color: #4CAF50; /* Success color */
+        color: white;
+        text-align: center;
+        border-radius: 5px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        top: 30px;
+        transform: translateX(-50%);
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s ease-in-out;
+    }
+
+    .show {
+        visibility: visible;
+        opacity: 1;
+    }
+</style>
+
+<script>
+    function showToaster() {
+        const toaster = document.getElementById("successToaster");
+        toaster.classList.add("show");
+
+        // Remove the toaster after 3 seconds
+        setTimeout(() => {
+            toaster.classList.remove("show");
+        }, 3000);
+    }
+
+    window.onload = function() {
+        // Show the toaster if 'success' context is passed from the view
+        {% if success %}
+            showToaster();
+        {% endif %}
+    };
+</script>
