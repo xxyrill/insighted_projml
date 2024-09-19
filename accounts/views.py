@@ -2,31 +2,21 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, DatEntryForm
 from django.contrib import messages
+from django.http import JsonResponse
+from .forms import CustomUserCreationForm, DatEntryForm
 
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        # username = request.POST.get('username')
-        # password = request.POST.get('password')
-
         if form.is_valid():
             form.save()
             return redirect('login')
-            # print(f"User created: {user.username}")
-            # user = authenticate(username=user.username, password=form.cleaned_data['password'])
-            # # print("User authenticated successfully!")
-            # if user is not None:
-            #     # print("User authenticated successfully!")
-            #     auth_login(request, user)
-            #     return redirect('dashboard')
         else:
             print(form.errors)
     else:
         form = CustomUserCreationForm()
     return render(request, 'authentications/registration.html', {'form': form})
-
 
 def login_view(request):
     if request.method == 'POST':
@@ -35,11 +25,6 @@ def login_view(request):
             user = form.get_user()
             auth_login(request, user)
             return redirect('home')
-        # form = AuthenticationForm(request, data=request.POST)
-        # if form.is_valid():
-        #     user = form.get_user()
-        #     auth_login(request, user)
-        #     return redirect('dashboard')  # Redirect to the dashboard after login
     else:
         form = AuthenticationForm()
     return render(request, 'authentications/login.html', {'form': form})
@@ -63,13 +48,17 @@ def dashboardgraph(request):
 def logout_view(request):
     return render(request, 'authentications/login.html')
 
+@login_required
 def upload_data(request):
     if request.method == 'POST':
         form = DatEntryForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect (request, 'dashboard/dashboard.html')
-
+            # If using AJAX, return success status
+            return JsonResponse({'status': 'success', 'message': 'Data uploaded successfully!'})
+        else:
+            # If form is invalid, return errors in JSON format
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
     else:
         form = DatEntryForm()
     return render(request, 'dashboard/upload_data.html', {'form': form})

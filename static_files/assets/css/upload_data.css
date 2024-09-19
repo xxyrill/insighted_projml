@@ -1,0 +1,14 @@
+/* Ensure modal is displayed in the center of the viewport */
+#uploadDataModal .modal-dialog {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Full height of viewport for vertical centering */
+}
+
+/* Optional: Add some spacing for better visual appearance */
+#uploadDataModal .modal-content {
+  margin: 0; /* Remove default margin */
+  width: 80%; /* Adjust width as needed */
+  max-width: 800px; /* Set a max-width to limit the size of the modal */
+}

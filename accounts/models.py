@@ -39,7 +39,7 @@ class DatEntry(models.Model):
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
-        ('N', 'Not specified')
+        ('O', 'Other')
     ]
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default="Not specified")
     program = models.CharField(max_length=255)
