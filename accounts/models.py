@@ -21,10 +21,11 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-class DatEntry(models.Model):
+class UploadCSV (models.Model):
     survey_name = models.CharField(max_length=255)
-    date_start = models.DateField()
-    date_close = models.DateField()
+    date_start = models.CharField(max_length=255)
+    date_close = models.CharField(max_length=255)
+    crs_num = models.CharField(max_length=255)
     crs_name = models.CharField(max_length=255)
     crs_year = models.IntegerField()
     dept_name = models.CharField(max_length=255)
@@ -33,9 +34,9 @@ class DatEntry(models.Model):
     eval_id = models.IntegerField()
     eval_uname = models.CharField(max_length=255)
     eval_email = models.CharField(max_length=255)
-    t_submit = models.DateTimeField()
-    mobile = models.BooleanField(default=False)
-    grad_year = models.DateField()
+    t_submit = models.CharField(max_length=255)
+    mobile = models.CharField(max_length=255)
+    grad_year = models.CharField(max_length=255)
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
@@ -197,21 +198,14 @@ class DatEntry(models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='The instructor provides sufficient attempts in the attainment of learning outcomes.')
-    question_31 = models.IntegerField(validators=[
-        MinValueValidator(-1),
-        MaxValueValidator(5)
-    ], default=0,
-        help_text='Comments on the Instructor.')
-    question_32 = models.IntegerField(validators=[
-        MinValueValidator(-1),
-        MaxValueValidator(5)
-    ], default=0,
-        help_text='Comments on the Course.')
+    question_31 = models.CharField(max_length=255)
+    question_32 = models.CharField(max_length=255)
 
     def __str__(self):
         return (f"Survey: {self.survey_name}, "
                 f"Date_start: {self.date_start}, "
                 f"Date_close: {self.date_close}, "
+                f"Crs_num: {self.crs_num}, "
                 f"Crs_name: {self.crs_name}, "
                 f"Crs_year: {self.crs_year}, "
                 f"Dept_name: {self.dept_name}, "

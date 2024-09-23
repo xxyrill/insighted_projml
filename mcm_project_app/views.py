@@ -19,28 +19,48 @@ def login_page(request):
     return render(request, 'authentications/login.html')
 
 def plot_ratings_trend(request):
+    # Extract filter values from GET request
+    term = request.GET.get('term', 'All Terms')
+    department = request.GET.get('department', 'All Departments')
+    instructor = request.GET.get('instructor', 'Respective Facilitator')
+    course = request.GET.get('course', 'All Courses')
+
     csv_file_path = csvPathFileName()
 
+    # Load CSV file
     data = pd.read_csv(csv_file_path)
-    columns = data.columns[20:49]
 
-    data = data.dropna(subset=columns)
+    # Apply filters based on the correct column indices
+    if term != 'All Terms':
+        data = data[data.iloc[:, 5] == term]  # Term is the 6th column (index 5)
+    if department != 'All Departments':
+        data = data[data.iloc[:, 6] == department]  # Department is the 7th column (index 6)
+    if instructor != 'Respective Facilitator':
+        data = data[data.iloc[:, 8] == instructor]  # Instructor is the 9th column (index 8)
+    if course != 'All Courses':
+        data = data[data.iloc[:, 4] == course]  # Course is the 5th column (index 4)
 
-    data['total_rating'] = data[columns].sum(axis=1)
+    # Ensure data is filtered correctly, and now proceed with graph generation
+    columns = data.columns[20:49]  # Assuming rating columns are from index 20 to 48
+    data = data.dropna(subset=columns)  # Drop rows where ratings are NaN
+    data['total_rating'] = data[columns].sum(axis=1)  # Summing across all rating columns
 
+    # Group by 'crsyear' (assuming this column stores the term/year)
     avg_ratings = data.groupby('crsyear')['total_rating'].mean().reset_index()
 
+    # Plotting the trend graph
     plt.figure(figsize=(10, 6))
     plt.plot(avg_ratings['crsyear'], avg_ratings['total_rating'], marker='o', linestyle='-', color='b')
     plt.title('Trend of Average Ratings Over Terms')
     plt.xlabel('Academic Term')
     plt.ylabel('Average Rating')
     plt.grid(True)
-    
+
+    # Save the plot to an in-memory file and return it as an HTTP response
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
-    
+
     return HttpResponse(img, content_type='image/png')
 
 def plot_department_avg_ratings(request):
@@ -58,7 +78,7 @@ def plot_department_avg_ratings(request):
 
     plt.figure(figsize=(12, 8))
 
-    sns.heatmap(avg_ratings, annot=True, cmap='viridis', fmt='.1f')
+    sns.heatmap(avg_ratings, annot=True, cmap='RdYlGn', fmt='.1f')
     
     plt.title('Department-wise Average Ratings')
     plt.xlabel('Academic Term')
@@ -91,6 +111,7 @@ def plot_rating_distribution(request):
     plt.title('Distribution of Ratings')
     plt.xlabel('Total Rating')
     plt.ylabel('Frequency')
+    plt.grid(True)
 
     # Box Plot
     # sns.boxplot(y=data['total_rating'])
@@ -178,12 +199,15 @@ def plot_comment_lengths(request):
     plt.title('Distribution of Instructor Comment Lengths')
     plt.xlabel('Length of Comments')
     plt.ylabel('Frequency')
+    plt.grid(axis='y')
+    plt.grid(True)
 
     plt.subplot(1, 2, 2)
     plt.hist(data['course_comment_length'], bins=30, color='salmon', edgecolor='black')
     plt.title('Distribution of Course Comment Lengths')
     plt.xlabel('Length of Comments')
     plt.ylabel('Frequency')
+    plt.grid(True)
 
     img = io.BytesIO()
     plt.savefig(img, format='png')
@@ -230,6 +254,7 @@ def plot_ratings_by_course(request):
     plt.ylabel('Total Rating')
     plt.title('Total Ratings by Course')
     plt.xticks(rotation=90)  # Rotate course names for better readability
+    plt.grid(True)
 
     # Save the plot to a BytesIO object
     img = io.BytesIO()
@@ -322,6 +347,7 @@ def plot_performance_by_year_and_department(request):
     plt.title('Average Ratings by Year and Department')
     plt.legend(title='Department')
     plt.xticks(rotation=45)  # Rotate year labels for better readability
+    plt.grid(True)
 
     # Save the plot to a BytesIO object
     img = io.BytesIO()
@@ -373,6 +399,7 @@ def plot_sentiment_over_time(request):
     plt.title('Sentiment Analysis Over Time')
     plt.legend()
     plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+    plt.grid(True)
 
     # Save the plot to a BytesIO object
     img = io.BytesIO()
@@ -422,6 +449,7 @@ def plot_instructor_performance_over_time(request):
     plt.title('Instructor Performance Over Time')
     plt.legend(title='Instructor Name', bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+    plt.grid(True)
 
     # Save the plot to a BytesIO object
     img = io.BytesIO()
@@ -519,17 +547,20 @@ def plot_ratings_vs_comment_length(request):
     ax1.set_xlabel('Instructor Comment Length (Words)')
     ax1.set_ylabel('Total Rating', color='b')
     ax1.tick_params(axis='y', labelcolor='b')
+    plt.grid(True)
 
     # Optionally, you can add a second scatter plot for course comments
     ax2 = ax1.twinx()
     sns.scatterplot(x='course_comment_length', y='total_rating', data=data, ax=ax2, color='r', label='Course Comments', marker='o')
     ax2.set_ylabel('Total Rating', color='r')
     ax2.tick_params(axis='y', labelcolor='r')
+    plt.grid(True)
 
     # Add titles and legends
     plt.title('Comparison of Ratings and Comment Length')
     ax1.legend(loc='upper left')
     ax2.legend(loc='upper right')
+
 
     # Save the plot to a BytesIO object
     img = io.BytesIO()
