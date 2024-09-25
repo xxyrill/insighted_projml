@@ -40,16 +40,7 @@
                   <option value="instructor_comparison_dashboard">Instructor Comparison Dashboard</option>
                 </select>
               </div>
-              <!-- Term Select -->
-              <div class="form-group">
-                <label for="term">Term:</label>
-                <select class="form-control" id="term">
-                  <option>All Terms</option>
-                  <option>1</option>
-                  <option>2</option>
-                  <!-- Add more options as needed -->
-                </select>
-              </div>
+
               <!-- Department Select -->
               <div class="form-group">
                 <label for="department">Department:</label>
@@ -236,5 +227,38 @@
   });
 </script>    
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#view-data-btn').click(function() {
+      // Capture the selected filter values
+      var graph = $('#graph').val();
+      var term = $('#term').val();
+      var department = $('#department').val();
+      var instructor = $('#instructor').val();
+      var course = $('#course').val();
+
+      // AJAX request to the appropriate view
+      $.ajax({
+        url: '/dashboard/generate_graph/',  // Adjust this URL based on your routing
+        method: 'GET',
+        data: {
+          'graph': graph,
+          'term': term,
+          'department': department,
+          'instructor': instructor,
+          'course': course,
+        },
+        success: function(data) {
+          // Load the returned graph into the graph-container
+          $('#graph-container').html('<img src="data:image/png;base64,' + data + '" class="img-fluid" />');
+        },
+        error: function(xhr, status, error) {
+          console.error("Error in generating graph:", error);
+        }
+      });
+    });
+  });
+</script>    
 {% endblock %}
 

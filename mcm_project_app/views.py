@@ -1,4 +1,5 @@
 import matplotlib
+
 matplotlib.use('Agg')  # Set the backend to Agg for non-interactive use
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -17,6 +18,7 @@ from django.urls import reverse
 
 def login_page(request):
     return render(request, 'authentications/login.html')
+
 
 def plot_ratings_trend(request):
     # Extract filter values from GET request
@@ -63,12 +65,13 @@ def plot_ratings_trend(request):
 
     return HttpResponse(img, content_type='image/png')
 
+
 def plot_department_avg_ratings(request):
     csv_file_path = csvPathFileName()
 
     data = pd.read_csv(csv_file_path)
 
-    columns = data.columns[20:49] 
+    columns = data.columns[20:49]
 
     data = data.dropna(subset=columns)
 
@@ -79,7 +82,7 @@ def plot_department_avg_ratings(request):
     plt.figure(figsize=(12, 8))
 
     sns.heatmap(avg_ratings, annot=True, cmap='RdYlGn', fmt='.1f')
-    
+
     plt.title('Department-wise Average Ratings')
     plt.xlabel('Academic Term')
     plt.ylabel('Department')
@@ -89,17 +92,18 @@ def plot_department_avg_ratings(request):
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
-    
+
     plt.close()
 
     return HttpResponse(img, content_type='image/png')
 
+
 def plot_rating_distribution(request):
-    csv_file_path = csvPathFileName()   
+    csv_file_path = csvPathFileName()
 
     data = pd.read_csv(csv_file_path)
 
-    columns = data.columns[20:49] 
+    columns = data.columns[20:49]
 
     data = data.dropna(subset=columns)
 
@@ -129,6 +133,7 @@ def plot_rating_distribution(request):
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
 
+
 def generate_word_cloud(text):
     # Check if text is not empty
     if len(text.strip()) > 0:
@@ -136,8 +141,9 @@ def generate_word_cloud(text):
         return wordcloud
     return None
 
+
 def plot_word_clouds(request):
-    csv_file_path = csvPathFileName()   
+    csv_file_path = csvPathFileName()
 
     data = pd.read_csv(csv_file_path)
 
@@ -182,6 +188,7 @@ def plot_word_clouds(request):
 
     return HttpResponse(img, content_type='image/png')
 
+
 def plot_comment_lengths(request):
     csv_file_path = csvPathFileName()
 
@@ -217,6 +224,7 @@ def plot_comment_lengths(request):
 
     return HttpResponse(img, content_type='image/png')
 
+
 def plot_ratings_by_course(request):
     # Path to your CSV file
     csv_file_path = csvPathFileName()
@@ -249,7 +257,8 @@ def plot_ratings_by_course(request):
 
     # Create a bar chart for average ratings by course
     plt.figure(figsize=(12, 8))
-    plt.bar(avg_ratings_per_course['crsname'], avg_ratings_per_course['total_rating'], color='lightblue', edgecolor='black')
+    plt.bar(avg_ratings_per_course['crsname'], avg_ratings_per_course['total_rating'], color='lightblue',
+            edgecolor='black')
     plt.xlabel('Course Name')
     plt.ylabel('Total Rating')
     plt.title('Total Ratings by Course')
@@ -266,6 +275,7 @@ def plot_ratings_by_course(request):
 
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
+
 
 def plot_correlation_heatmap(request):
     # Path to your CSV file
@@ -312,6 +322,7 @@ def plot_correlation_heatmap(request):
 
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
+
 
 def plot_performance_by_year_and_department(request):
     # Path to your CSV file
@@ -360,6 +371,7 @@ def plot_performance_by_year_and_department(request):
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
 
+
 def plot_sentiment_over_time(request):
     # Path to your CSV file
     csv_file_path = csvPathFileName()
@@ -392,8 +404,10 @@ def plot_sentiment_over_time(request):
 
     # Plot the average sentiment scores over time
     plt.figure(figsize=(12, 6))
-    sns.lineplot(data=sentiment_by_term, x='crsyear', y='instructor_sentiment', label='Instructor Comments Sentiment', marker='o')
-    sns.lineplot(data=sentiment_by_term, x='crsyear', y='course_sentiment', label='Course Comments Sentiment', marker='o')
+    sns.lineplot(data=sentiment_by_term, x='crsyear', y='instructor_sentiment', label='Instructor Comments Sentiment',
+                 marker='o')
+    sns.lineplot(data=sentiment_by_term, x='crsyear', y='course_sentiment', label='Course Comments Sentiment',
+                 marker='o')
     plt.xlabel('Academic Year')
     plt.ylabel('Average Sentiment Score')
     plt.title('Sentiment Analysis Over Time')
@@ -412,7 +426,7 @@ def plot_sentiment_over_time(request):
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
 
- 
+
 def plot_instructor_performance_over_time(request):
     # Path to your CSV file
     csv_file_path = csvPathFileName()
@@ -462,6 +476,7 @@ def plot_instructor_performance_over_time(request):
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
 
+
 def plot_pareto_analysis(request):
     # Path to your CSV file
     csv_file_path = csvPathFileName()
@@ -484,9 +499,10 @@ def plot_pareto_analysis(request):
 
     # Rank courses by average rating
     average_ratings = average_ratings.sort_values(by='total_rating', ascending=False)
-    
+
     # Calculate cumulative contribution
-    average_ratings['cumulative_percentage'] = average_ratings['total_rating'].cumsum() / average_ratings['total_rating'].sum() * 100
+    average_ratings['cumulative_percentage'] = average_ratings['total_rating'].cumsum() / average_ratings[
+        'total_rating'].sum() * 100
 
     # Create a Pareto chart
     fig, ax1 = plt.subplots(figsize=(14, 8))
@@ -500,7 +516,8 @@ def plot_pareto_analysis(request):
 
     # Line chart for cumulative percentage
     ax2 = ax1.twinx()
-    sns.lineplot(x=average_ratings[course_col], y='cumulative_percentage', data=average_ratings, ax=ax2, color='r', marker='o', linestyle='--')
+    sns.lineplot(x=average_ratings[course_col], y='cumulative_percentage', data=average_ratings, ax=ax2, color='r',
+                 marker='o', linestyle='--')
     ax2.set_ylabel('Cumulative Percentage', color='r')
     ax2.tick_params(axis='y', labelcolor='r')
 
@@ -517,6 +534,7 @@ def plot_pareto_analysis(request):
 
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
+
 
 def plot_ratings_vs_comment_length(request):
     # Path to your CSV file
@@ -537,13 +555,15 @@ def plot_ratings_vs_comment_length(request):
     data['total_rating'] = data[rating_columns].sum(axis=1)
 
     # Calculate the length of comments
-    data['instructor_comment_length'] = data[instructor_comment_col].apply(lambda x: len(str(x).split()) if pd.notna(x) else 0)
+    data['instructor_comment_length'] = data[instructor_comment_col].apply(
+        lambda x: len(str(x).split()) if pd.notna(x) else 0)
     data['course_comment_length'] = data[course_comment_col].apply(lambda x: len(str(x).split()) if pd.notna(x) else 0)
 
     # Create a scatter plot comparing ratings with instructor comment length
     fig, ax1 = plt.subplots(figsize=(14, 8))
 
-    sns.scatterplot(x='instructor_comment_length', y='total_rating', data=data, ax=ax1, color='b', label='Instructor Comments')
+    sns.scatterplot(x='instructor_comment_length', y='total_rating', data=data, ax=ax1, color='b',
+                    label='Instructor Comments')
     ax1.set_xlabel('Instructor Comment Length (Words)')
     ax1.set_ylabel('Total Rating', color='b')
     ax1.tick_params(axis='y', labelcolor='b')
@@ -551,7 +571,8 @@ def plot_ratings_vs_comment_length(request):
 
     # Optionally, you can add a second scatter plot for course comments
     ax2 = ax1.twinx()
-    sns.scatterplot(x='course_comment_length', y='total_rating', data=data, ax=ax2, color='r', label='Course Comments', marker='o')
+    sns.scatterplot(x='course_comment_length', y='total_rating', data=data, ax=ax2, color='r', label='Course Comments',
+                    marker='o')
     ax2.set_ylabel('Total Rating', color='r')
     ax2.tick_params(axis='y', labelcolor='r')
     plt.grid(True)
@@ -560,7 +581,6 @@ def plot_ratings_vs_comment_length(request):
     plt.title('Comparison of Ratings and Comment Length')
     ax1.legend(loc='upper left')
     ax2.legend(loc='upper right')
-
 
     # Save the plot to a BytesIO object
     img = io.BytesIO()
@@ -572,6 +592,7 @@ def plot_ratings_vs_comment_length(request):
 
     # Return the plot as a response
     return HttpResponse(img, content_type='image/png')
+
 
 def plot_instructor_comparison_dashboard(request):
     # Path to your CSV file
@@ -607,7 +628,7 @@ def plot_instructor_comparison_dashboard(request):
     ax1.set_title('Instructor Performance Over Time')
     ax1.legend(loc='upper left')
     ax1.grid(True)
-    
+
     # Save the line chart to a BytesIO object
     line_chart_img = io.BytesIO()
     plt.savefig(line_chart_img, format='png', bbox_inches='tight')
@@ -622,7 +643,7 @@ def plot_instructor_comparison_dashboard(request):
     ax2.set_title('Average Ratings by Instructor')
     ax2.set_xticklabels(ax2.get_xticklabels(), rotation=45, ha='right')
     ax2.grid(True)
-    
+
     # Save the bar chart to a BytesIO object
     bar_chart_img = io.BytesIO()
     plt.savefig(bar_chart_img, format='png', bbox_inches='tight')
@@ -639,7 +660,7 @@ def plot_instructor_comparison_dashboard(request):
     ax3.imshow(wordcloud, interpolation='bilinear')
     ax3.axis('off')
     ax3.set_title('Word Cloud of Instructor Comments')
-    
+
     wordcloud_img = io.BytesIO()
     plt.savefig(wordcloud_img, format='png', bbox_inches='tight')
     wordcloud_img.seek(0)
@@ -654,8 +675,9 @@ def plot_instructor_comparison_dashboard(request):
     wordcloud = Image.open(wordcloud_img)
 
     # Create a new image to combine the plots
-    combined_img = Image.new('RGB', (line_chart.width, line_chart.height + bar_chart.height + wordcloud.height), 'white')
-    
+    combined_img = Image.new('RGB', (line_chart.width, line_chart.height + bar_chart.height + wordcloud.height),
+                             'white')
+
     # Paste images into the combined image
     combined_img.paste(line_chart, (0, 0))
     combined_img.paste(bar_chart, (0, line_chart.height))
