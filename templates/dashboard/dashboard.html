@@ -19,12 +19,12 @@
           <div class="container-fluid text-center">
             <h5 class="card-title text-center font-weight-bold">Filters</h5>
             <!-- Filter Form -->
-            <form>
+            <form method="GET" action="{% url 'generate_graph' %}">
               <!-- Graph Select -->
               <div class="form-group">
                 <label for="graph">Graph:</label>
-                <select class="form-control" id="graph">
-                  <option value="all">All Graphs</option>
+                <select class="form-control" id="graph" name="graph">
+                  <option value="all"></option>
                   <option value="ratings_trend">Ratings Trend</option>
                   <option value="department_avg_ratings">Department Average Ratings</option>
                   <option value="rating_distribution">Rating Distribution</option>
@@ -41,60 +41,53 @@
                 </select>
               </div>
 
-              <!-- Department Select -->
-              <div class="form-group">
-                <label for="department">Department:</label>
-                <select class="form-control" id="department">
-                  <option>All Departments</option>
-                  <option>ATYCB</option>
-                  <option>CEA</option>
-                  <option>CHS</option>
-                  <option>CAS</option>
-                  <option>CCIS</option>  
-                  <option>NSTP</option>                    
-                  <!-- Add more options as needed -->
-                </select>
-              </div>
-              <!-- Instructor Select -->
-              <div class="form-group">
-                <label for="instructor">Instructor:</label>
-                <select class="form-control" id="instructor">
-                  <option>Respective Facilitator</option>
- 
-                  <!-- Add more options as needed -->
-                </select>
-              </div>
-              <!-- Course Select -->
-              <div class="form-group">
-                <label for="course">Course:</label>
-                <select class="form-control" id="course">
-                  <option>All Courses</option>
-                  <option>Updates in Financial Reporting Standards</option>
-                  <option>Financial Accounting and Reporting</option>
-                  <option>Intermediate Accounting 1</option>
-                  <option>Financial Reporting 1A</option>
-                  <option>Intermediate Accounting 1A</option>
-                  <!-- Add more options as needed -->
-                </select>
-              </div>
+<!-- Department Select -->
+<div class="form-group">
+    <label for="department">Department:</label>
+    <select class="form-control" id="department" name="department">
+        <option value="All Departments"></option>
+        {% for department in departments %}
+            <option value="{{ department }}">{{ department }}</option>
+        {% empty %}
+            <option value="">No departments available</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Instructor Select -->
+<div class="form-group">
+    <label for="instructor">Instructor:</label>
+    <select class="form-control" id="instructor" name="instructor">
+        <option value="Respective Facilitator"></option>
+        {% for instructor in instructors %}
+            <option value="{{ instructor }}">{{ instructor }}</option>
+        {% empty %}
+            <option value="">No instructors available</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Course Select -->
+<div class="form-group">
+    <label for="course">Course:</label>
+    <select class="form-control" id="course" name="course">
+        <option value="All Courses"></option>
+        {% for course in courses %}
+            <option value="{{ course }}">{{ course }}</option>
+        {% empty %}
+            <option value="">No courses available</option>
+        {% endfor %}
+    </select>
+</div>
+</form>
               <!-- Filter and Clear Filters Buttons -->
-              <div class="d-flex justify-content-between">
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  style="width: 10rem"
-                >
-                  Filter
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  style="width: 10rem"
-                >
-                  Clear Filters
-                </button>
-              </div>
+
+ <div class="d-flex justify-content-between">
+     <button type="submit" class="btn btn-primary" style="width: 10rem">Filter</button>
+     <button type="button" id="clear-filters-btn" class="btn btn-secondary" style="width: 10rem">Clear Filters</button>
+ </div>
             </form>
+
             <!-- Upload and View Data Buttons -->
             <div class="mt-4 text-center">
               {% if user_type == 'VPAA' %}
@@ -102,15 +95,13 @@
                       class="btn btn-primary btn-block"
                       data-toggle="modal"
                       data-target="#uploadDataModal"
-                      data-backdrop="false" 
-                      >
+                      data-backdrop="false">
                 Upload Data
               </button>
               {% endif %}
-              <button type="button" 
-                      id="view-data-btn" 
-                      class="btn btn-primary btn-block mt-2" 
-                       >
+              <button type="button"
+                      id="view-data-btn"
+                      class="btn btn-primary btn-block mt-2">
                 View Data
               </button>
             </div>
@@ -119,146 +110,66 @@
       </div>
     </div>
 
-
     <div class="col-md-8">
       <div class="card shadow rounded">
         <div class="card-body" style="height: 700px; overflow-y: auto;">
-            <div id="graph-container" class="container-fluid">
-            </div>
+          <div id="graph-container" class="container-fluid">
+            <!-- Graph content will be loaded here -->
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-
-<!-- GETTING THE GRAPH IMAGE -->
-<!-- Pass static URLs to the HTML as data attributes -->
-<div id="graph-urls" data-ratings-trend="{% static 'assets/img/graph/plot-ratings-trend.png' %}"
-                  data-department-avg-ratings="{% static 'assets/img/graph/plot-department-avg-ratings.png' %}"
-                  data-rating-distribution="{% static 'assets/img/graph/plot-rating-distribution.png' %}"
-                  data-word-clouds="{% static 'assets/img/graph/plot-word-clouds.png' %}"
-                  data-comment-lengths="{% static 'assets/img/graph/plot-comment-lengths.png' %}"
-                  data-ratings-by-course="{% static 'assets/img/graph/plot-ratings-by-course.png' %}"
-                  data-correlation-heatmap="{% static 'assets/img/graph/plot-correlation-by-heatmap.png' %}"
-                  data-performance-year-department="{% static 'assets/img/graph/plot-performance-by-year-and-department.png' %}"
-                  data-sentiment-over-time="{% static 'assets/img/graph/plot-sentiment-over-time.png' %}"
-                  data-instructor-performance-time="{% static 'assets/img/graph/plot-instructor-performance-over-time.png' %}"
-                  data-pareto-analysis="{% static 'assets/img/graph/plot-pareto-analysis.png' %}"
-                  data-ratings-vs-comment-length="{% static 'assets/img/graph/plot-ratings-vs-comment-length.png' %}"
-                  data-instructor-comparison-dashboard="{% static 'assets/img/graph/plot-instructor-comparison-dashboard.png' %}"
->
-
-</div>
-
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Get the static URLs from the data attributes
-    const graphUrls = document.getElementById('graph-urls').dataset;
+    document.getElementById('view-data-btn').addEventListener('click', function() {
+        const graphType = document.getElementById('graph').value;
+        const department = document.getElementById('department').value;
 
-    const graphImages = {
-      'ratings_trend': graphUrls.ratingsTrend,
-      'department_avg_ratings': graphUrls.departmentAvgRatings,
-      'rating_distribution': graphUrls.ratingDistribution,
-      'word_clouds': graphUrls.wordClouds,
-      'comment_lengths': graphUrls.commentLengths,
-      'ratings_by_course': graphUrls.ratingsByCourse,
-      'correlation_heatmap': graphUrls.correlationHeatmap,
-      'performance_year_department': graphUrls.performanceYearDepartment,
-      'sentiment_over_time': graphUrls.sentimentOverTime,
-      'instructor_performance_time': graphUrls.instructorPerformanceTime,
-      'pareto_analysis': graphUrls.paretoAnalysis,
-      'ratings_vs_comment_length': graphUrls.ratingsVsCommentLength,
-      'instructor_comparison_dashboard': graphUrls.instructorComparisonDashboard
-    };
+        // Check if graph type is selected
+        if (!graphType) {
+            alert("Please select a graph type.");
+            return;
+        }
 
-    function updateGraphs() {
-      var graphType = document.getElementById('graph').value;
-      var graphContainer = document.getElementById('graph-container');
-      graphContainer.innerHTML = '';
-
-      if (graphType === 'all') {
-        Object.keys(graphImages).forEach(function (key) {
-          var img = document.createElement('img');
-          img.src = graphImages[key];
-          img.alt = key.replace(/_/g, ' ') + ' Graph';
-          img.style.width = '100%';
-          img.classList.add('mb-3');
-          graphContainer.appendChild(img);
-        });
-      } else {
-        if (graphImages[graphType]) {
-          var img = document.createElement('img');
-          img.src = graphImages[graphType];
-          img.alt = graphType.replace(/_/g, ' ') + ' Graph';
-          img.style.width = '100%';
-          graphContainer.appendChild(img);
+        // Build the URL with selected parameters based on graph type
+        let url;
+        if (graphType === 'ratings_trend') {
+            url = new URL("{% url 'plot_ratings_trend' %}", window.location.origin);
+            url.searchParams.append('department', department);  // Pass the selected department
         } else {
-          graphContainer.innerHTML = '<p>No graph selected or image available for this selection.</p>';
+            url = new URL("{% url 'generate_graph' %}", window.location.origin);
+            url.searchParams.append('graph', graphType);
+            url.searchParams.append('department', department);
         }
-      }
-    }
 
-    // Trigger the updateGraphs function when the page loads
-    updateGraphs();
-
-    document.getElementById('view-data-btn').addEventListener('click', updateGraphs);
-
-    // Also trigger updateGraphs when the select value changes
-    document.getElementById('graph').addEventListener('change', updateGraphs);
-  });
-</script>
-    
-<!-- FOR DISPLAY MESSAGE AFTER CSV IS UPLOADED -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-      const messageContainer = document.getElementById('message-container');
-      if (messageContainer) {
-          setTimeout(() => {
-              const messages = messageContainer.querySelectorAll('.fade-out');
-              messages.forEach(message => {
-                  message.classList.add('hidden');
-              });
-              setTimeout(() => {
-                  messageContainer.remove(); // Remove the container from DOM after fade out
-              }, 1000); // Match this duration with the CSS transition duration
-          }, 5000); // Delay before starting to fade out
-      }
-  });
-</script>    
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('#view-data-btn').click(function() {
-      // Capture the selected filter values
-      var graph = $('#graph').val();
-      var term = $('#term').val();
-      var department = $('#department').val();
-      var instructor = $('#instructor').val();
-      var course = $('#course').val();
-
-      // AJAX request to the appropriate view
-      $.ajax({
-        url: '/dashboard/generate_graph/',  // Adjust this URL based on your routing
-        method: 'GET',
-        data: {
-          'graph': graph,
-          'term': term,
-          'department': department,
-          'instructor': instructor,
-          'course': course,
-        },
-        success: function(data) {
-          // Load the returned graph into the graph-container
-          $('#graph-container').html('<img src="data:image/png;base64,' + data + '" class="img-fluid" />');
-        },
-        error: function(xhr, status, error) {
-          console.error("Error in generating graph:", error);
-        }
-      });
+        // Fetch the graph data
+        fetch(url, {
+            method: 'GET',
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('graph-container').innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error fetching the graph:', error);
+        });
     });
-  });
-</script>    
-{% endblock %}
+</script>
 
+<script>
+    document.getElementById('clear-filters-btn').addEventListener('click', function() {
+        // Reset the filter selects to their default values
+        document.getElementById('graph').selectedIndex = 0; // Reset graph select
+        document.getElementById('department').selectedIndex = 0; // Reset department select
+        document.getElementById('instructor').selectedIndex = 0; // Reset instructor select
+        document.getElementById('course').selectedIndex = 0; // Reset course select
+
+        // Clear the graph container
+        document.getElementById('graph-container').innerHTML = '';
+    });
+</script>
+
+
+{% endblock %}

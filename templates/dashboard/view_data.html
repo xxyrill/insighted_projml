@@ -126,5 +126,13 @@
             {% endfor %}
             </tbody>
     </table>
+
+<select name="instructor">
+    <option value="Respective Facilitator">Respective Facilitator</option>
+    {% for instructor in instructors %}
+        <option value="{{ instructor }}">{{ instructor }}</option>
+    {% endfor %}
+</select>
+
 </body>
 </html>
