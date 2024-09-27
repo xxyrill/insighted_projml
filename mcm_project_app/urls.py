@@ -6,5 +6,16 @@ urlpatterns = [
     path('dashboard/generate_graph/', views.generate_graph, name='generate_graph'),
     path('dashboard/', views.dashboard_view, name='dashboard'),  # Use views.dashboard_view
     path('plot-ratings-trend/', views.plot_ratings_trend, name='plot_ratings_trend'),
+    path('plot_department_average_ratings/', views.plot_department_average_ratings, name='plot_department_average_ratings'),
+    path('plot_rating_distribution/', views.plot_rating_distribution, name='plot_rating_distribution'),
+    path('plot_word_clouds/', views.plot_word_clouds, name='plot_word_clouds'),
+    path('plot_length_of_comments_analysis/', views.plot_length_of_comments_analysis, name='plot_length_of_comments_analysis'),
+    #
+    path('plot_ratings_by_course/', views.plot_ratings_by_course, name='plot_ratings_by_course'),
+    path('plot_correlation_heatmap/', views.plot_correlation_heatmap, name='plot_correlation_heatmap'),
+    path('plot_performance_by_year_and_department/', views.plot_performance_by_year_and_department, name='plot_performance_by_year_and_department'),
+    path('plot_sentiment_analysis_over_time/', views.plot_sentiment_analysis_over_time, name='plot_sentiment_analysis_over_time'),
+    path('plot_comparison_of_ratings_and_comment_length/', views.plot_comparison_of_ratings_and_comment_length, name='plot_comparison_of_ratings_and_comment_length'),
 
+    # Correlation Heatmap url
 ]
