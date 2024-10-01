@@ -1,18 +1,19 @@
 {% extends 'components/layouts.html' %} 
 {% block content %} 
-    {% if user_type == 'VPAA' %}
-    <h5>Welcome Vice President of Academic Affairs</h5>
-    <!-- VPAA-specific content -->
-    {% elif user_type == 'ideals' %}
-    <h5>Welcome Ideals</h5>
-    <!-- Ideals-specific content -->
-    {% elif user_type == 'hr' %}
-    <h5>Welcome HR</h5>
-    <!-- HR-specific content -->
-    {% elif user_type == 'deans' %}
-    <h5>Welcome Deans</h5>
-    <!-- Deans-specific content -->
-    {% else %}
-    <h5>Welcome</h5>
-    {% endif %} 
+{#    {% if user_type == 'VPAA' %}#}
+{#    <h5>Welcome Vice President of Academic Affairs</h5>#}
+{#    <!-- VPAA-specific content -->#}
+{#    {% elif user_type == 'Ideals' %}#}
+{#    <h5>Welcome Ideals</h5>#}
+{#    <!-- Ideals-specific content -->#}
+{#    {% elif user_type == 'hr' %}#}
+{#    <h5>Welcome HR</h5>#}
+{#    <!-- HR-specific content -->#}
+{#    {% elif user_type == 'deans' %}#}
+{#    <h5>Welcome Deans</h5>#}
+{#    <!-- Deans-specific content -->#}
+{#    {% else %}#}
+{#    <h5>Welcome</h5>#}
+{#    {% endif %} #}
+    <h5>Welcome {{ user_type }} </h5>
 {% endblock %}

@@ -24,12 +24,15 @@ from io import BytesIO
 from matplotlib.colors import LinearSegmentedColormap
 from nltk.sentiment import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
+from django.db import IntegrityError
+from django.db import transaction
 
 
 
 def login_page(request):
     return render(request, 'authentications/login.html')
 
+# Delete database
 def calculate_sentiment_scores():
     # Initialize the Sentiment Intensity Analyzer
     sia = SentimentIntensityAnalyzer()
@@ -48,22 +51,28 @@ def calculate_sentiment_scores():
     return df[['sentiment_score_question_31', 'sentiment_score_question_32']]
 
 def upload_csv_to_db(csv_file_path):
-    df = pd.read_csv(csv_file_path)
-    print("DataFrame Loaded:\n", df)
+    # Print starting message
+    print("Starting deletion...")  # Ensure this line is included
 
-    # Clear existing data if necessary
-    with connection.cursor() as cursor:
-        cursor.execute("TRUNCATE TABLE UploadCSV")  # Use the actual table name
+    # Step 1: Clear existing data in the UploadCSV table
+    try:
+        records_deleted = UploadCSV.objects.all().delete()  # This clears all existing records
+        print(f"Deleted {records_deleted[0]} records from UploadCSV.")
+    except Exception as e:
+        print(f"Error while deleting records: {e}")
 
-    # Insert data into your table
+    # Step 2: Insert new data into the UploadCSV table
     for _, row in df.iterrows():
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO your_actual_table_name (dept_name, resp_fac, crs_name) VALUES (%s, %s, %s)",
-                (row['deptname'], row['resp_fac'], row['crs_name'])
+        try:
+            UploadCSV.objects.create(
+                dept_name=row['deptname'],
+                resp_fac=row['resp_fac'],
+                crs_name=row['crs_name']
             )
+        except IntegrityError as e:
+            print(f"Error inserting row: {e}")  # Log or handle the error if necessary
 
-    # Extract unique values for filters
+    # Step 3: Extract unique values for filters
     departments = df['deptname'].unique()
     instructors = df['resp_fac'].unique()
     courses = df['crs_name'].unique()
@@ -73,7 +82,6 @@ def upload_csv_to_db(csv_file_path):
     print("Unique Courses:", courses)
 
     return departments, instructors, courses
-
 
 def dashboard_view(request):
     departments = list(UploadCSV.objects.values_list('dept_name', flat=True).distinct())  # Convert QuerySet to list
@@ -95,20 +103,20 @@ def upload_csv(request):
         csv_file = request.FILES['csv_file']
         csv_file_path = f"{settings.MEDIA_ROOT}/{csv_file.name}"
 
-        # Save the uploaded file
+        # Step 1: Save the uploaded file
         with open(csv_file_path, 'wb+') as destination:
             for chunk in csv_file.chunks():
                 destination.write(chunk)
 
-        # Call the function to upload CSV to database
+        # Step 2: Call the function to upload CSV to database
         try:
-            # Get unique values after uploading CSV
+            # Step 3: Get unique values after uploading CSV
             departments, instructors, courses = upload_csv_to_db(csv_file_path)
 
             # Set success message
             messages.success(request, "CSV uploaded successfully.")
 
-            # Render the dashboard with updated context
+            # Step 4: Render the dashboard with updated context
             context = {
                 'departments': departments.tolist(),  # Convert to list for template rendering
                 'instructors': instructors.tolist(),  # Convert to list for template rendering
@@ -131,7 +139,7 @@ def generate_graph(request):
     if graph_type == 'ratings_trend':
         img = plot_ratings_trend(request)
     elif graph_type == 'department_avg_ratings':
-        img = plot_department_avg_ratings(request)
+        img = plot_department_average_ratings(request)
     # Add logic for other graphs as needed
 
     # Convert image to base64 for frontend display
@@ -221,17 +229,11 @@ def plot_ratings_trend(request):
     img.seek(0)
     plt.close()
 
-    # Step 9: Convert image to base64 string
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return JsonResponse({'image': img_base64})
 
-    # Step 10: Prepare the context with the image
-    context = {
-        'graph_image': img_base64  # Pass the base64 image to the template
-    }
 
-    # Step 11: Render the template
-    return render(request, 'dashboard/plot_ratings_trend.html', context)
-
+# 2. Department-wise Average Ratings
 def plot_department_average_ratings(request):
     # Step 1: Query the UploadCSV table to get the required data including department and ratings
     data = UploadCSV.objects.all().values('dept_name', 'question_1', 'question_2', 'question_3', 'question_4',
@@ -288,14 +290,7 @@ def plot_department_average_ratings(request):
 
     # Step 9: Convert image to base64 string
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 10: Prepare the context with the image
-    context = {
-        'graph_image': img_base64  # Pass the base64 image to the template
-    }
-
-    # Step 11: Render the template
-    return render(request, 'dashboard/plot_department_average_ratings.html', context)
+    return JsonResponse({'image': img_base64})
 
 def plot_rating_distribution(request):
     # Step 1: Query the UploadCSV table to get the required data (all question ratings)
@@ -356,17 +351,8 @@ def plot_rating_distribution(request):
     img.seek(0)
     plt.close()
 
-    # Step 8: Convert image to base64 string
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 9: Prepare the context with the image
-    context = {
-        'graph_image': img_base64  # Pass the base64 image to the template
-    }
-
-    # Step 10: Render the template
-    return render(request, 'dashboard/plot_rating_distribution.html', context)
-
+    return JsonResponse({'image': img_base64})
 
 def plot_word_clouds(request):
     # Step 1: Query the UploadCSV table to get comments data
@@ -438,8 +424,12 @@ def plot_word_clouds(request):
         'course_wordcloud': course_wordcloud_base64
     }
 
-    # Step 8: Render the template
-    return render(request, 'dashboard/plot_word_clouds.html', context)
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+
+    return JsonResponse({'image': image_base64})
 
 # FIX NO RATING
 def plot_length_of_comments_analysis(request):
@@ -486,227 +476,8 @@ def plot_length_of_comments_analysis(request):
     }
 
     # Step 7: Render the template
-    return render(request, 'dashboard/plot_length_of_comments_analysis.html', context)
-
-# NO RATINGS / CANNOT BE PLOT
-def plot_ratings_by_course(request):
-    # Step 1: Query the UploadCSV table to get the required data (course names and questions 1 to 32)
-    data = UploadCSV.objects.all().values('crs_name', 'question_1', 'question_2', 'question_3', 'question_4',
-                                          'question_5', 'question_6', 'question_7', 'question_8', 'question_9',
-                                          'question_10', 'question_11', 'question_12', 'question_13', 'question_14',
-                                          'question_15', 'question_16', 'question_17', 'question_18', 'question_19',
-                                          'question_20', 'question_21', 'question_22', 'question_23', 'question_24',
-                                          'question_25', 'question_26', 'question_27', 'question_28', 'question_29',
-                                          'question_30', 'question_31', 'question_32')
-
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to analyze questions.", status=400)
-
-    # Step 4: Convert question columns to numeric, forcing non-numeric values to NaN
-    for col in ['question_1', 'question_2', 'question_3', 'question_4', 'question_5', 'question_6', 'question_7', 'question_8', 'question_9',
-                'question_10', 'question_11', 'question_12', 'question_13', 'question_14', 'question_15',]:
-        df[col] = pd.to_numeric(df[col], errors='coerce')  # Convert to numeric, forcing errors to NaN
-
-    # Step 5: Reshape the DataFrame to have one column for the questions and their values
-    df_melted = df.melt(id_vars=['crs_name'], value_vars=['question_1', 'question_2', 'question_3', 'question_4',
-                                                          'question_5', 'question_6', 'question_7', 'question_8',
-                                                          'question_9', 'question_10', 'question_11', 'question_12',
-                                                          'question_13', 'question_14', 'question_15',],
-                           var_name='question', value_name='rating')
-
-    # Step 6: Calculate average ratings per course and per question
-    average_ratings = df_melted.groupby(['crs_name', 'question'])['rating'].mean().reset_index()
-
-    # Step 7: Generate the bar chart
-    plt.figure(figsize=(20, 15))
-    sns.barplot(x='crs_name', y='rating', hue='question', data=average_ratings, palette='viridis')
-    plt.title('Average Responses for Questions 1-32 by Course')
-    plt.xlabel('Course Name')
-    plt.ylabel('Average Response')
-    plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', title='Question')
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Convert image to base64 string
-    bar_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 8: Prepare the context with the image
-    context = {
-        'bar_chart': bar_chart_base64
-    }
-
-    # Step 9: Render the template
-    return render(request, 'dashboard/plot_ratings_by_course.html', context)
-
-def plot_correlation_heatmap(request):
-    # Step 1: Query the UploadCSV table to get necessary data
-    data = UploadCSV.objects.all().values(
-        'question_1', 'question_2', 'question_3', 'question_4', 'question_5',
-        'question_6', 'question_7', 'question_8', 'question_9', 'question_10',
-        'question_11', 'question_12', 'question_13', 'question_14', 'question_15',
-        'question_16', 'question_17', 'question_18', 'question_19', 'question_20',
-        'question_21', 'question_22', 'question_23', 'question_24', 'question_25',
-        'question_26', 'question_27', 'question_28', 'question_29', 'question_30',
-    )
-
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate heatmap.", status=400)
-
-    # Step 4: Convert the data to numeric, coercing errors (like 'N/A') to NaN
-    df = df.apply(pd.to_numeric, errors='coerce')
-
-    # Step 5: Calculate the correlation matrix
-    correlation_matrix = df.corr()
-
-    # Step 6: Generate the heatmap with a red-yellow-green color scheme
-    plt.figure(figsize=(20, 15))  # Adjust the size as needed
-
-    # Create a custom red-yellow-green colormap
-    cmap = LinearSegmentedColormap.from_list("custom_cmap", ['red', 'yellow', 'green'])
-
-    sns.heatmap(correlation_matrix, annot=True, cmap=cmap, fmt='.2f', square=True, cbar_kws={"shrink": .8})
-    plt.title('Correlation Heatmap')
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Convert image to base64 string
-    heatmap_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 7: Prepare the context with the heatmap image
-    context = {
-        'heatmap': heatmap_base64
-    }
-
-    # Step 8: Render the template
-    return render(request, 'dashboard/plot_correlation_heatmap.html', context)
-
-# FIX NO RATING COLUMN
-def plot_performance_by_year_and_department(request):
-    # Step 1: Query the UploadCSV table to get necessary data
-    data = UploadCSV.objects.all().values('crs_year', 'dept_name', 'rating')
-
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate the performance chart.", status=400)
-
-    # Step 4: Calculate average ratings grouped by year and department
-    avg_ratings = df.groupby(['crs_year', 'dept_name'])[
-        ['question_1', 'question_2', 'question_3', 'question_4', 'question_5',
-         'question_6', 'question_7', 'question_8', 'question_9', 'question_10',
-         'question_11', 'question_12', 'question_13', 'question_14', 'question_15',
-         'question_16', 'question_17', 'question_18', 'question_19', 'question_20',
-         'question_21', 'question_22', 'question_23', 'question_24', 'question_25',
-         'question_26', 'question_27', 'question_28', 'question_29', 'question_30',
-         ]
-    ].mean().reset_index()
-
-    # Step 5: Pivot the DataFrame for plotting
-    questions = [
-        'question_1', 'question_2', 'question_3', 'question_4', 'question_5',
-        'question_6', 'question_7', 'question_8', 'question_9', 'question_10',
-        'question_11', 'question_12', 'question_13', 'question_14', 'question_15',
-        'question_16', 'question_17', 'question_18', 'question_19', 'question_20',
-        'question_21', 'question_22', 'question_23', 'question_24', 'question_25',
-        'question_26', 'question_27', 'question_28', 'question_29', 'question_30',
-
-    ]
-
-    # Dictionary to store pivot tables for each question
-    pivot_tables = {}
-
-    for question in questions:
-        pivot_tables[question] = avg_ratings.pivot(index='crs_year', columns='dept_name', values=question)
-
-    # Step 6: Generate the bar chart
-    plt.figure(figsize=(10, 6))
-    pivot_df.plot(kind='bar', stacked=False)  # Change to `stacked=True` for a stacked bar chart
-    plt.title('Average Ratings by Year and Department')
-    plt.xlabel('Year')
-    plt.ylabel('Average Rating')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Convert image to base64 string
-    performance_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 7: Prepare the context with the chart image
-    context = {
-        'performance_chart': performance_chart_base64
-    }
-
-    # Step 8: Render the template
-    return render(request, 'dashboard/performance_by_year_and_department.html', context)
-
-# HOW TO GET THE SENTIMENT SCORE?
-def plot_sentiment_analysis_over_time(request):
-    # Step 1: Query the UploadCSV table to get necessary data
-    # Assuming you have a sentiment_score column
-    data = UploadCSV.objects.all().values('crs_year', 'sentiment_score')  # Include the sentiment score column
-
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate the sentiment analysis chart.", status=400)
-
-    # Step 4: Calculate the average sentiment score grouped by year
-    avg_sentiment = df.groupby('crs_year')['sentiment_score'].mean().reset_index()
-
-    # Step 5: Generate the line chart
-    plt.figure(figsize=(12, 6))
-    plt.plot(avg_sentiment['crs_year'], avg_sentiment['sentiment_score'], marker='o', color='blue')
-    plt.title('Average Sentiment Score Over Time')
-    plt.xlabel('Year')
-    plt.ylabel('Average Sentiment Score')
-    plt.xticks(rotation=45)
-    plt.grid()
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Convert image to base64 string
-    sentiment_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 6: Prepare the context with the chart image
-    context = {
-        'sentiment_chart': sentiment_chart_base64
-    }
-
-    # Step 7: Render the template
-    return render(request, 'dashboard/sentiment_analysis_over_time.html', context)
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return JsonResponse({'image': img_base64})
 
 def plot_sentiment_analysis_over_time(request):
     # Calculate sentiment scores
@@ -751,7 +522,6 @@ def plot_sentiment_analysis_over_time(request):
 
     # Step 8: Render the template
     return render(request, 'dashboard/plot_sentiment_analysis_over_time.html', context)
-
 
 def plot_comparison_of_ratings_and_comment_length(request):
     # Step 1: Query your data
@@ -849,3 +619,122 @@ def plot_comparison_of_ratings_and_comment_length(request):
 
 # 13. Instructor Comparison Dashboard
 
+# 14. Instructor Leaderboard
+def plot_instructor_leaderboard(request):
+    # Query the UploadCSV table for necessary data
+    data = UploadCSV.objects.all().values('resp_fac', *['question_{}'.format(i) for i in range(1, 30)])
+    df = pd.DataFrame(list(data))
+
+    # Convert question columns to numeric, coercing errors to NaN
+    question_columns = ['question_{}'.format(i) for i in range(1, 30)]
+    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
+
+    # Drop rows with NaN values in question columns
+    df.dropna(subset=question_columns, inplace=True)
+
+    # Calculate average ratings for each instructor
+    avg_ratings = df[question_columns].mean(axis=1)
+    df['average_rating'] = avg_ratings
+
+    # Sort instructors by average rating
+    leaderboard = df.groupby('resp_fac')['average_rating'].mean().reset_index().sort_values(by='average_rating',
+                                                                                            ascending=False)
+
+    # Limit to top 10 instructors to reduce congestion (optional)
+    leaderboard = leaderboard.head(10)
+
+    # Plot the leaderboard with increased width
+    plt.figure(figsize=(15, 8))  # Adjusted width and height
+    plt.barh(leaderboard['resp_fac'], leaderboard['average_rating'], color='skyblue')
+
+    # Set titles and labels with increased font size
+    plt.title('Instructor Leaderboard', fontsize=20)  # Increased title font size
+    plt.xlabel('Average Rating', fontsize=16)  # Increased x-axis label font size
+    plt.ylabel('Instructors', fontsize=16)  # Increased y-axis label font size
+
+    # Increase tick label font size
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+
+    plt.tight_layout()
+
+    # Save the plot to a BytesIO object
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Encode the image to base64 to return it in HTML
+    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    context = {
+        'image_base64': image_base64,
+    }
+
+    return render(request, 'dashboard/plot_instructor_leaderboard.html', context)
+
+
+##### GRAPHS WITH TWO FILTERS
+
+def plot_pareto_analysis(request):
+    # Step 1: Query course data and ratings from the database (adjust field names accordingly)
+    data = UploadCSV.objects.all().values('crs_name', 'question_1', 'question_2', 'question_3', 'question_4')  # Modify questions as per your needs
+
+    # Step 2: Convert the QuerySet to a DataFrame
+    df = pd.DataFrame(list(data))
+
+    # Step 3: Calculate average rating for each course
+    df['avg_rating'] = df[['question_1', 'question_2', 'question_3', 'question_4']].mean(axis=1)
+
+    # Step 4: Group by course and calculate average rating per course
+    course_ratings = df.groupby('crs_name')['avg_rating'].mean().reset_index()
+
+    # Step 5: Sort courses by average rating in descending order
+    course_ratings = course_ratings.sort_values(by='avg_rating', ascending=False)
+
+    # Optional: Display top N courses (e.g., top 10) and group others
+    top_n = 10
+    if len(course_ratings) > top_n:
+        others = pd.DataFrame({'crs_name': ['Other'], 'avg_rating': [course_ratings[top_n:]['avg_rating'].sum()]})
+        course_ratings = pd.concat([course_ratings[:top_n], others])
+
+    # Step 6: Calculate cumulative percentage contribution
+    course_ratings['cumulative_percentage'] = course_ratings['avg_rating'].cumsum() / course_ratings['avg_rating'].sum() * 100
+
+    # Step 7: Plot the Pareto chart (bar chart with cumulative line)
+    fig, ax1 = plt.subplots(figsize=(14, 7))  # Increased figure size
+
+    # Bar chart for course ratings
+    ax1.bar(course_ratings['crs_name'], course_ratings['avg_rating'], color='C0', width=0.6)  # Narrower bars
+    ax1.set_xlabel('Courses')
+    ax1.set_ylabel('Average Rating', color='C0')
+    ax1.tick_params(axis='y', labelcolor='C0')
+
+    # Rotate and adjust the position of x-axis labels
+    plt.xticks(rotation=60, ha='right')
+
+    # Line chart for cumulative percentage
+    ax2 = ax1.twinx()
+    ax2.plot(course_ratings['crs_name'], course_ratings['cumulative_percentage'], color='C1', marker='o', linestyle='-', linewidth=2)
+    ax2.set_ylabel('Cumulative Percentage', color='C1')
+    ax2.tick_params(axis='y', labelcolor='C1')
+
+    # Pareto chart title
+    plt.title('Pareto Analysis of Courses')
+
+    # Step 8: Save the chart to a BytesIO object
+    img = BytesIO()
+    plt.tight_layout()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Step 9: Convert the image to base64 string
+    pareto_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    # Step 10: Pass the base64 image to the template
+    context = {
+        'pareto_chart': pareto_chart_base64,
+    }
+
+    # Render the template with the context
+    return render(request, 'dashboard/plot_pareto_analysis.html', context)

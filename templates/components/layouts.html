@@ -64,6 +64,13 @@
                   <i class="bx bx-bookmark nav_icon"></i>
                   <span class="nav_name">Admin</span>
                 </a>
+              {% if user_type == 'IDEALS' %}
+              <a href="{% url 'register' %}" class="nav_link">
+                  <i class="bx bx-bookmark nav_icon"></i>
+                  <span class="nav_name">Create Account</span>
+                </a>
+              {% endif %}
+
               </div>
             </div>
             <a href="#" class="nav_link">

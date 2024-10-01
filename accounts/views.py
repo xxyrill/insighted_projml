@@ -14,12 +14,16 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            user_type = request.user.user_type
+            context = {
+                'user_type': user_type
+            }
+            return render(request, 'dashboard/create_account.html', context)
         else:
             print(form.errors)
     else:
         form = CustomUserCreationForm()
-    return render(request, 'authentications/registration.html', {'form': form})
+    return render(request, 'dashboard/create_account.html', {'form':form})
 
 def login_view(request):
     if request.method == 'POST':
@@ -50,6 +54,22 @@ def dashboardgraph(request):
 
 def logout_view(request):
     return render(request, 'authentications/login.html')
+
+@login_required
+def create_account(request):
+    return render(request, 'dashboard/create_account.html')
+
+# Delete database
+def delete_data(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            # Step 1: Clear existing data in the UploadCSV table
+            UploadCSV.objects.all().delete()
+            messages.success(request, "All data deleted successfully.")
+        else:
+            messages.error(request, "You are not authorized to delete data.")
+
+        return redirect('dashboard')  # Redirect to your dashboard or wherever appropriate
 
 @login_required
 def upload_csv(request):

@@ -12,6 +12,46 @@
           {% endfor %}
       </div>
   {% endif %}
+
+<!-- Delete db button -->
+
+<div class="mt-4 text-center">
+    {% if user.is_authenticated %}
+    <button type="button"
+            id="delete-data-btn"
+            class="btn btn-danger btn-block mt-2"
+            data-toggle="modal"
+            data-target="#confirmDeleteModal">
+        Delete Existing Data
+    </button>
+    {% endif %}
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete all existing data?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <form method="POST" action="{% url 'delete_data' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
   <div class="row">
     <div class="col-md-4">
       <div class="card shadow rounded d-flex justify-content-center align-items-center">
@@ -30,56 +70,13 @@
                   <option value="rating_distribution">Rating Distribution</option>
                   <option value="word_clouds">Word Clouds</option>
                   <option value="comment_lengths">Comment Lengths</option>
-                  <option value="ratings_by_course">Ratings by Course</option>
-                  <option value="correlation_heatmap">Correlation by Heatmap</option>
-                  <option value="performance_year_department">Performance by Year and Department</option>
                   <option value="sentiment_over_time">Sentiment Over Time</option>
                   <option value="instructor_performance_time">Instructor Performance Over Time</option>
                   <option value="pareto_analysis">Pareto Analysis</option>
                   <option value="ratings_vs_comment_length">Ratings VS Comment Length</option>
-                  <option value="instructor_comparison_dashboard">Instructor Comparison Dashboard</option>
                 </select>
               </div>
 
-<!-- Department Select -->
-<div class="form-group">
-    <label for="department">Department:</label>
-    <select class="form-control" id="department" name="department">
-        <option value="All Departments"></option>
-        {% for department in departments %}
-            <option value="{{ department }}">{{ department }}</option>
-        {% empty %}
-            <option value="">No departments available</option>
-        {% endfor %}
-    </select>
-</div>
-
-<!-- Instructor Select -->
-<div class="form-group">
-    <label for="instructor">Instructor:</label>
-    <select class="form-control" id="instructor" name="instructor">
-        <option value="Respective Facilitator"></option>
-        {% for instructor in instructors %}
-            <option value="{{ instructor }}">{{ instructor }}</option>
-        {% empty %}
-            <option value="">No instructors available</option>
-        {% endfor %}
-    </select>
-</div>
-
-<!-- Course Select -->
-<div class="form-group">
-    <label for="course">Course:</label>
-    <select class="form-control" id="course" name="course">
-        <option value="All Courses"></option>
-        {% for course in courses %}
-            <option value="{{ course }}">{{ course }}</option>
-        {% empty %}
-            <option value="">No courses available</option>
-        {% endfor %}
-    </select>
-</div>
-</form>
               <!-- Filter and Clear Filters Buttons -->
 
  <div class="d-flex justify-content-between">
@@ -119,57 +116,90 @@
         </div>
       </div>
     </div>
+  
+  
   </div>
 </div>
-
 <script>
-    document.getElementById('view-data-btn').addEventListener('click', function() {
-        const graphType = document.getElementById('graph').value;
-        const department = document.getElementById('department').value;
-
-        // Check if graph type is selected
-        if (!graphType) {
-            alert("Please select a graph type.");
-            return;
-        }
-
-        // Build the URL with selected parameters based on graph type
-        let url;
-        if (graphType === 'ratings_trend') {
-            url = new URL("{% url 'plot_ratings_trend' %}", window.location.origin);
-            url.searchParams.append('department', department);  // Pass the selected department
-        } else {
-            url = new URL("{% url 'generate_graph' %}", window.location.origin);
-            url.searchParams.append('graph', graphType);
-            url.searchParams.append('department', department);
-        }
-
-        // Fetch the graph data
-        fetch(url, {
-            method: 'GET',
-        })
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('graph-container').innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error fetching the graph:', error);
-        });
-    });
-</script>
-
-<script>
+    // Event listener for clearing filters
     document.getElementById('clear-filters-btn').addEventListener('click', function() {
-        // Reset the filter selects to their default values
+        // Reset filter selections to their default values
         document.getElementById('graph').selectedIndex = 0; // Reset graph select
         document.getElementById('department').selectedIndex = 0; // Reset department select
         document.getElementById('instructor').selectedIndex = 0; // Reset instructor select
         document.getElementById('course').selectedIndex = 0; // Reset course select
 
-        // Clear the graph container
+        // Clear the graph container to remove any graphs
         document.getElementById('graph-container').innerHTML = '';
+    });
+
+    // Event listener for the "View Data" button
+    document.getElementById("view-data-btn").addEventListener("click", function() {
+        const selectedGraph = document.getElementById("graph").value;
+        let graphUrl = '';
+
+        // Define the URL based on selected graph
+        switch (selectedGraph) {
+            case 'ratings_trend':
+                graphUrl = '/plot_ratings_trend/';
+                break;
+            case 'department_avg_ratings':
+                graphUrl = '/plot_department_average_ratings/';
+                break;
+            case 'rating_distribution':
+                graphUrl = '/plot_rating_distribution/';
+                break;
+            case 'word_clouds':
+                graphUrl = '/plot_word_clouds/';
+                break;
+            case 'comment_lengths':
+                graphUrl = '/plot_length_of_comments_analysis/';
+                break;
+            default:
+                graphUrl = '';
+        }
+
+        console.log("View Data button clicked, fetching graph from:", graphUrl);
+
+        if (graphUrl) {
+            fetch(graphUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle the response based on graph type
+                    if (selectedGraph === 'word_clouds') {
+                        // For word clouds, handle both instructor and course word clouds
+                        const instructorImgTag = `<img src="data:image/png;base64,${data.instructor_wordcloud}" alt="Instructor Word Cloud" class="img-fluid" />`;
+                        const courseImgTag = `<img src="data:image/png;base64,${data.course_wordcloud}" alt="Course Word Cloud" class="img-fluid" />`;
+                        
+                        document.getElementById('graph-container').innerHTML = `
+                            <h3>Instructor Comments</h3>
+                            ${instructorImgTag}
+                            <h3>Course Comments</h3>
+                            ${courseImgTag}
+                        `;
+                    } else if (data.image) {
+                        const imgTag = `<img src="data:image/png;base64,${data.image}" alt="${selectedGraph} Graph" class="img-fluid" />`;
+                        console.log("Image tag created:", imgTag);
+                        document.getElementById('graph-container').innerHTML = imgTag;
+                    } else if (data.error) {
+                        document.getElementById('graph-container').innerHTML = `<p>${data.error}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching the graph:', error);
+                    document.getElementById('graph-container').innerHTML = `<p>Error loading graph: ${error.message}</p>`;
+                });
+        } else {
+            document.getElementById('graph-container').innerHTML = '<p>Please select a graph type.</p>';
+        }
     });
 </script>
 
+   
 
 {% endblock %}
