@@ -1,0 +1,16 @@
+.modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem); /* adjust if needed */
+}
+
+/* Make the modal content scrollable if it overflows */
+.modal-content {
+    max-height: 80vh; /* Adjust based on your design */
+    overflow-y: auto;
+}
+
+/* Ensure the modal has a transparent background */
+.modal-backdrop.show {
+    background-color: rgba(0, 0, 0, 0.5); /* Adjust the opacity if needed */
+}
