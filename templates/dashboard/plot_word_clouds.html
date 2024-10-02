@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Clouds</title>
+    <title>Dashboard</title>
 </head>
 <body>
-    <!-- Instructor Comments-->
-    <img src="data:image/png;base64,{{ instructor_wordcloud }}" alt="Instructor Word Cloud">
-    
-    <!-- Course Comments-->
-    <img src="data:image/png;base64,{{ course_wordcloud }}" alt="Course Word Cloud">
+    <h1>Dashboard</h1>
+
+    <h2>Instructor Word Cloud</h2>
+    <img src="data:image/png;base64,{{ instructor_image }}" alt="Instructor Word Cloud">
+
+    <h2>Course Word Cloud</h2>
+    <img src="data:image/png;base64,{{ course_image }}" alt="Course Word Cloud">
+
+    <!-- Add more dashboard content here -->
+
 </body>
 </html>

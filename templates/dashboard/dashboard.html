@@ -64,16 +64,15 @@
               <div class="form-group">
                 <label for="graph">Graph:</label>
                 <select class="form-control" id="graph" name="graph">
-                  <option value="all"></option>
                   <option value="ratings_trend">Ratings Trend</option>
                   <option value="department_avg_ratings">Department Average Ratings</option>
                   <option value="rating_distribution">Rating Distribution</option>
-                  <option value="word_clouds">Word Clouds</option>
+                  <option value="comments_pie_chart">Comments Pie Chart</option>
                   <option value="comment_lengths">Comment Lengths</option>
                   <option value="sentiment_over_time">Sentiment Over Time</option>
-                  <option value="instructor_performance_time">Instructor Performance Over Time</option>
                   <option value="pareto_analysis">Pareto Analysis</option>
                   <option value="ratings_vs_comment_length">Ratings VS Comment Length</option>
+                  <option value="instructor_leaderboard">Instructor Leaderboard</option>
                 </select>
               </div>
 
@@ -149,12 +148,24 @@
             case 'rating_distribution':
                 graphUrl = '/plot_rating_distribution/';
                 break;
-            case 'word_clouds':
-                graphUrl = '/plot_word_clouds/';
+            case 'comments_pie_chart':
+                graphUrl = '/plot_comments_pie_chart/';
                 break;
             case 'comment_lengths':
                 graphUrl = '/plot_length_of_comments_analysis/';
                 break;
+            case 'sentiment_over_time':
+                graphUrl = '/plot_sentiment_analysis_over_time/';
+                break;      
+            case 'pareto_analysis':
+                graphUrl = '/plot_pareto_analysis/';
+                break;      
+            case 'ratings_vs_comment_length':
+                graphUrl = '/plot_comparison_of_ratings_and_comment_length/';
+                break;        
+            case 'instructor_leaderboard':
+                graphUrl = '/plot_instructor_leaderboard/';
+                break;                   
             default:
                 graphUrl = '';
         }
@@ -171,23 +182,19 @@
                 })
                 .then(data => {
                     // Handle the response based on graph type
-                    if (selectedGraph === 'word_clouds') {
-                        // For word clouds, handle both instructor and course word clouds
-                        const instructorImgTag = `<img src="data:image/png;base64,${data.instructor_wordcloud}" alt="Instructor Word Cloud" class="img-fluid" />`;
-                        const courseImgTag = `<img src="data:image/png;base64,${data.course_wordcloud}" alt="Course Word Cloud" class="img-fluid" />`;
-                        
+                    if (selectedGraph === 'comments_pie_chart') {
+                        // For pie charts (instructor and course comments)
+                        const instructorImgTag = `<img src="data:image/png;base64,${data.instructor_chart}" alt="Instructor Comments Pie Chart" class="img-fluid" />`;
+                        const courseImgTag = `<img src="data:image/png;base64,${data.course_chart}" alt="Course Comments Pie Chart" class="img-fluid" />`;
+
                         document.getElementById('graph-container').innerHTML = `
-                            <h3>Instructor Comments</h3>
                             ${instructorImgTag}
-                            <h3>Course Comments</h3>
                             ${courseImgTag}
                         `;
                     } else if (data.image) {
+                        // For other graphs
                         const imgTag = `<img src="data:image/png;base64,${data.image}" alt="${selectedGraph} Graph" class="img-fluid" />`;
-                        console.log("Image tag created:", imgTag);
                         document.getElementById('graph-container').innerHTML = imgTag;
-                    } else if (data.error) {
-                        document.getElementById('graph-container').innerHTML = `<p>${data.error}</p>`;
                     }
                 })
                 .catch(error => {
@@ -200,6 +207,5 @@
     });
 </script>
 
-   
 
 {% endblock %}

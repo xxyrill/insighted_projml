@@ -1,4 +1,6 @@
 import matplotlib
+import nltk
+import re
 matplotlib.use('Agg')  # Set the backend to Agg for non-interactive use
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,7 +28,14 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 from django.db import IntegrityError
 from django.db import transaction
-
+from nltk.corpus import stopwords
+import string
+from django.http import JsonResponse
+from collections import Counter
+import numpy as np
+from accounts.models import UploadCSV
+import re
+from collections import Counter
 
 
 def login_page(request):
@@ -229,6 +238,7 @@ def plot_ratings_trend(request):
     img.seek(0)
     plt.close()
 
+    # Step 9: Convert image to base64 string
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
     return JsonResponse({'image': img_base64})
 
@@ -267,17 +277,31 @@ def plot_department_average_ratings(request):
     # Step 5: Calculate the total rating per row by summing the question columns
     df['total_rating'] = df[question_columns].sum(axis=1)
 
-    # Step 6: Group by 'deptname' and calculate the average total rating
+    # Step 6: Group by 'dept_name' and calculate the average total rating
     avg_ratings = df.groupby('dept_name')['total_rating'].mean().reset_index()
 
     # Step 7: Plot the average ratings for each department as a bar chart
     import matplotlib.pyplot as plt
     plt.figure(figsize=(12, 8))
-    plt.bar(avg_ratings['dept_name'], avg_ratings['total_rating'], color='skyblue')
+    rects = plt.bar(avg_ratings['dept_name'], avg_ratings['total_rating'], color='skyblue')
+
+    # Add title and labels
     plt.title('Department-wise Average Ratings')
     plt.xlabel('Department')
     plt.ylabel('Average Rating')
+
+    # Rotate x-axis labels for better readability
     plt.xticks(rotation=45, ha="right")
+
+    # Enable gridlines for the y-axis
+    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+
+    # Add numbers (height of each bar) on top of the bars
+    for rect in rects:
+        yval = rect.get_height()
+        plt.text(rect.get_x() + rect.get_width()/2, yval, round(yval, 2), va='bottom', ha='center', fontsize=10)
+
+    # Ensure the layout is adjusted properly
     plt.tight_layout()
 
     # Step 8: Save the plot to a BytesIO object
@@ -326,24 +350,27 @@ def plot_rating_distribution(request):
     # Step 5: Combine all question columns into a single series to analyze rating distribution
     ratings_data = df[question_columns].values.flatten()  # Flatten the DataFrame to 1D array
 
-    # Step 6: Plot the distribution using a histogram or box plot
+    # Step 6: Plot the distribution using a histogram
     import matplotlib.pyplot as plt
     import seaborn as sns
 
-    # Option 1: Plot histogram
     plt.figure(figsize=(10, 6))
-    sns.histplot(ratings_data, bins=30, kde=True, color='blue')  # KDE for smooth distribution curve
+    ax = sns.histplot(ratings_data, bins=30, kde=True, color='blue')  # KDE for smooth distribution curve
     plt.title('Distribution of Ratings (Histogram)')
     plt.xlabel('Rating')
     plt.ylabel('Frequency')
 
-    # Option 2: Uncomment the following for box plot
-    # plt.figure(figsize=(10, 6))
-    # sns.boxplot(x=ratings_data, color='skyblue')
-    # plt.title('Distribution of Ratings (Box Plot)')
-    # plt.xlabel('Rating')
+    # Step 7: Add gridlines and display counts on top of bars
+    plt.grid(True, linestyle='--', alpha=0.7)
 
-    # Step 7: Save the plot to a BytesIO object
+    # Add counts on top of bars
+    for patch in ax.patches:
+        height = patch.get_height()
+        if height > 0:  # Check to avoid division by zero
+            plt.text(patch.get_x() + patch.get_width() / 2, height,
+                     f'{int(height)}', ha='center', va='bottom', fontsize=10)
+
+    # Step 8: Save the plot to a BytesIO object
     from io import BytesIO
     import base64
     img = BytesIO()
@@ -354,84 +381,64 @@ def plot_rating_distribution(request):
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
     return JsonResponse({'image': img_base64})
 
-def plot_word_clouds(request):
-    # Step 1: Query the UploadCSV table to get comments data
-    data = UploadCSV.objects.all().values('question_31', 'question_32')
 
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    import pandas as pd
-    df = pd.DataFrame(list(data))
+nltk.download('stopwords')
 
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate word clouds.", status=400)
+# Function to get word frequencies
+def get_word_frequencies(comments):
+    # Combine all comments into one text
+    text = ' '.join(comments)
 
-    # Debugging: Print the DataFrame
-    print("DataFrame contents:", df)
+    # Clean the text
+    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
+    words = text.lower().split()  # Convert to lowercase and split into words
 
-    # Step 4: Extract comments for instructors and courses, and combine them into single strings
-    instructor_comments = " ".join(df['question_31'].dropna().tolist())
-    course_comments = " ".join(df['question_32'].dropna().tolist())
+    # Remove stop words
+    stop_words = set(stopwords.words('english'))
+    filtered_words = [word for word in words if word not in stop_words]
 
-    # Filter out unwanted comments
-    instructor_comments = " ".join([comment for comment in instructor_comments.split() if comment.lower() not in ['none', 'n/a', 'no comment']])
-    course_comments = " ".join([comment for comment in course_comments.split() if comment.lower() not in ['none', 'n/a', 'no comment']])
+    # Count word frequencies
+    word_counts = Counter(filtered_words)
+    return word_counts.most_common(10)  # Get the top 10 words
 
-    # Debugging: Print combined comments
-    print(f"Instructor Comments: '{instructor_comments}'")
-    print(f"Course Comments: '{course_comments}'")
+# Function to plot a pie chart and convert it to base64
+def plot_pie_chart(word_counts, title):
+    labels, sizes = zip(*word_counts)
+    plt.figure(figsize=(10, 6))
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.title(title)
+    plt.tight_layout()
 
-    # Step 5: Preprocess the comments by converting them to lowercase and removing common stop words
-    from wordcloud import WordCloud
-    import matplotlib.pyplot as plt
-    from nltk.corpus import stopwords
-    import string
+    # Save plot to BytesIO
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
 
-    # Get stopwords and add punctuation to the stopwords list
-    stop_words = set(stopwords.words('english') + list(string.punctuation))
+    # Convert image to base64 string
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return img_base64
 
-    # Helper function to create word cloud
-    def generate_word_cloud(text, title):
-        wordcloud = WordCloud(width=800, height=400, background_color='white',
-                              stopwords=stop_words, collocations=False).generate(text)
-        plt.figure(figsize=(10, 5))
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.axis('off')
-        plt.title(title, fontsize=16)
-        plt.tight_layout()
+# View to generate pie charts and return them as base64 images in JSON response
+def plot_comments_pie_chart(request):
+    comments_instructor = UploadCSV.objects.values_list('question_31', flat=True)
+    comments_course = UploadCSV.objects.values_list('question_32', flat=True)
 
-        # Save the plot to a BytesIO object
-        from io import BytesIO
-        import base64
-        img = BytesIO()
-        plt.savefig(img, format='png')
-        img.seek(0)
-        plt.close()
+    # Get word frequencies
+    instructor_word_counts = get_word_frequencies(comments_instructor)
+    course_word_counts = get_word_frequencies(comments_course)
 
-        return base64.b64encode(img.getvalue()).decode('utf-8')
+    # Generate pie charts and encode them to base64
+    instructor_chart_base64 = plot_pie_chart(instructor_word_counts, 'Instructor Comments Word Frequencies')
+    course_chart_base64 = plot_pie_chart(course_word_counts, 'Course Comments Word Frequencies')
 
-    # Step 6: Generate word clouds for both sets of comments
-    instructor_wordcloud_base64 = generate_word_cloud(instructor_comments, 'Word Cloud for Instructor Comments')
-    course_wordcloud_base64 = generate_word_cloud(course_comments, 'Word Cloud for Course Comments')
+    # Return the base64-encoded images in a JSON response
+    return JsonResponse({
+        'instructor_chart': instructor_chart_base64,
+        'course_chart': course_chart_base64
+    })
 
-    # Debugging: Print word cloud data
-    print("Instructor WordCloud Base64: ", instructor_wordcloud_base64)
-    print("Course WordCloud Base64: ", course_wordcloud_base64)
-
-    # Step 7: Prepare the context with both images
-    context = {
-        'instructor_wordcloud': instructor_wordcloud_base64,
-        'course_wordcloud': course_wordcloud_base64
-    }
-
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
-
-    return JsonResponse({'image': image_base64})
-
-# FIX NO RATING
 def plot_length_of_comments_analysis(request):
     # Step 1: Query the UploadCSV table to get comments data
     data = UploadCSV.objects.all().values('question_31', 'question_32')  # Adjust these fields as needed
@@ -451,14 +458,26 @@ def plot_length_of_comments_analysis(request):
     plt.figure(figsize=(12, 10))
 
     # Increase the number of bins to reduce congestion
-    sns.histplot(df['instructor_comment_length'], bins=30, color='blue', kde=True, label='Instructor Comments', alpha=0.5)
-    sns.histplot(df['course_comment_length'], bins=30, color='orange', kde=True, label='Course Comments', alpha=0.5)
+    ax = sns.histplot(df['instructor_comment_length'], bins=30, color='blue', kde=True,
+                      label='Instructor Comments', alpha=0.5)
+    sns.histplot(df['course_comment_length'], bins=30, color='orange', kde=True,
+                  label='Course Comments', alpha=0.5)
 
     plt.title('Distribution of Comment Lengths')
     plt.xlabel('Comment Length (characters)')
     plt.ylabel('Frequency')
     plt.legend()
-    plt.grid(axis='y')  # Optional: Add a grid for better readability
+
+    # Step 6: Add gridlines and display counts on top of bars
+    plt.grid(axis='y', linestyle='--', alpha=0.7)  # Add gridlines
+
+    # Add counts on top of bars
+    for patch in ax.patches:
+        height = patch.get_height()
+        if height > 0:  # Check to avoid division by zero
+            plt.text(patch.get_x() + patch.get_width() / 2, height,
+                     f'{int(height)}', ha='center', va='bottom', fontsize=10)
+
     plt.tight_layout()
 
     # Save the plot to a BytesIO object
@@ -470,14 +489,13 @@ def plot_length_of_comments_analysis(request):
     # Convert image to base64 string
     histogram_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
 
-    # Step 6: Prepare the context with the image
+    # Step 7: Prepare the context with the image
     context = {
         'histogram': histogram_base64
     }
 
-    # Step 7: Render the template
-    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    return JsonResponse({'image': img_base64})
+    # Step 8: Render the template
+    return JsonResponse({'image': histogram_base64})
 
 def plot_sentiment_analysis_over_time(request):
     # Calculate sentiment scores
@@ -521,7 +539,8 @@ def plot_sentiment_analysis_over_time(request):
     }
 
     # Step 8: Render the template
-    return render(request, 'dashboard/plot_sentiment_analysis_over_time.html', context)
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return JsonResponse({'image': img_base64})
 
 def plot_comparison_of_ratings_and_comment_length(request):
     # Step 1: Query your data
@@ -615,9 +634,8 @@ def plot_comparison_of_ratings_and_comment_length(request):
     }
 
     # Step 11: Render the template
-    return render(request, 'dashboard/plot_comparison_of_ratings_and_comment_length.html', context)
-
-# 13. Instructor Comparison Dashboard
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return JsonResponse({'image': img_base64})
 
 # 14. Instructor Leaderboard
 def plot_instructor_leaderboard(request):
@@ -645,7 +663,7 @@ def plot_instructor_leaderboard(request):
 
     # Plot the leaderboard with increased width
     plt.figure(figsize=(15, 8))  # Adjusted width and height
-    plt.barh(leaderboard['resp_fac'], leaderboard['average_rating'], color='skyblue')
+    bars = plt.barh(leaderboard['resp_fac'], leaderboard['average_rating'], color='skyblue')
 
     # Set titles and labels with increased font size
     plt.title('Instructor Leaderboard', fontsize=20)  # Increased title font size
@@ -655,6 +673,15 @@ def plot_instructor_leaderboard(request):
     # Increase tick label font size
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
+
+    # Add grid lines
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+
+    # Annotate the bars with their corresponding values
+    for bar in bars:
+        plt.text(bar.get_width(), bar.get_y() + bar.get_height() / 2,
+                 f'{bar.get_width():.2f}',
+                 va='center', ha='left', fontsize=12)
 
     plt.tight_layout()
 
@@ -666,12 +693,9 @@ def plot_instructor_leaderboard(request):
 
     # Encode the image to base64 to return it in HTML
     image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    context = {
-        'image_base64': image_base64,
-    }
 
-    return render(request, 'dashboard/plot_instructor_leaderboard.html', context)
-
+    # Return the image in JSON format
+    return JsonResponse({'image': image_base64})
 
 ##### GRAPHS WITH TWO FILTERS
 
@@ -691,20 +715,18 @@ def plot_pareto_analysis(request):
     # Step 5: Sort courses by average rating in descending order
     course_ratings = course_ratings.sort_values(by='avg_rating', ascending=False)
 
-    # Optional: Display top N courses (e.g., top 10) and group others
+    # Step 6: Keep only the top N courses
     top_n = 10
-    if len(course_ratings) > top_n:
-        others = pd.DataFrame({'crs_name': ['Other'], 'avg_rating': [course_ratings[top_n:]['avg_rating'].sum()]})
-        course_ratings = pd.concat([course_ratings[:top_n], others])
+    course_ratings = course_ratings.head(top_n)
 
-    # Step 6: Calculate cumulative percentage contribution
+    # Step 7: Calculate cumulative percentage contribution
     course_ratings['cumulative_percentage'] = course_ratings['avg_rating'].cumsum() / course_ratings['avg_rating'].sum() * 100
 
-    # Step 7: Plot the Pareto chart (bar chart with cumulative line)
-    fig, ax1 = plt.subplots(figsize=(14, 7))  # Increased figure size
+    # Step 8: Plot the Pareto chart (bar chart with cumulative line)
+    fig, ax1 = plt.subplots(figsize=(14, 12))  # Increased figure size
 
     # Bar chart for course ratings
-    ax1.bar(course_ratings['crs_name'], course_ratings['avg_rating'], color='C0', width=0.6)  # Narrower bars
+    bars = ax1.bar(course_ratings['crs_name'], course_ratings['avg_rating'], color='C0', width=0.6)  # Narrower bars
     ax1.set_xlabel('Courses')
     ax1.set_ylabel('Average Rating', color='C0')
     ax1.tick_params(axis='y', labelcolor='C0')
@@ -712,29 +734,33 @@ def plot_pareto_analysis(request):
     # Rotate and adjust the position of x-axis labels
     plt.xticks(rotation=60, ha='right')
 
+    # Add counts on top of bars
+    for bar in bars:
+        height = bar.get_height()
+        ax1.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.2f}', ha='center', va='bottom', fontsize=10)
+
     # Line chart for cumulative percentage
     ax2 = ax1.twinx()
     ax2.plot(course_ratings['crs_name'], course_ratings['cumulative_percentage'], color='C1', marker='o', linestyle='-', linewidth=2)
     ax2.set_ylabel('Cumulative Percentage', color='C1')
     ax2.tick_params(axis='y', labelcolor='C1')
 
+    # Add gridlines
+    ax1.grid(axis='y', linestyle='--', alpha=0.7)
+
     # Pareto chart title
     plt.title('Pareto Analysis of Courses')
 
-    # Step 8: Save the chart to a BytesIO object
+    # Step 9: Save the chart to a BytesIO object
     img = BytesIO()
     plt.tight_layout()
     plt.savefig(img, format='png')
     img.seek(0)
     plt.close()
 
-    # Step 9: Convert the image to base64 string
+    # Step 10: Convert the image to base64 string
     pareto_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
 
-    # Step 10: Pass the base64 image to the template
-    context = {
-        'pareto_chart': pareto_chart_base64,
-    }
+    # Step 11: Pass the base64 image to the template
+    return JsonResponse({'image': pareto_chart_base64})
 
-    # Render the template with the context
-    return render(request, 'dashboard/plot_pareto_analysis.html', context)
