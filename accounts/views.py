@@ -9,19 +9,20 @@ from .models import UploadCSV
 from django.utils import timezone
 import csv
 
+
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        print(form)
         if form.is_valid():
             form.save()
-            #Swal.fire()
-            return render( 'dashboard/create_account.html', )
+            # Display a success message on the same page
+            messages.success(request, "Account created successfully!")
         else:
             print(form.errors)
     else:
         form = CustomUserCreationForm()
-    return render(request, 'dashboard/create_account.html', {'form':form})
+
+    return render(request, 'dashboard/create_account.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':

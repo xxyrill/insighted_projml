@@ -2,6 +2,16 @@
 <!-- Filter Form -->
 
 {% block content %}
+    <div class="card-body">
+      <!-- Messages block -->
+      {% if messages %}
+        <div id="message-container">
+          {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+        
 <div class="page-inne">
   <div class="card card-primary">
     <div class="card-header"><h4>Create Account</h4></div>
@@ -72,4 +82,15 @@
     </div>
   </div>
 </div>
+        
+<!-- JavaScript to hide the message after 3 seconds -->
+<script>
+  setTimeout(function() {
+      var messageContainer = document.getElementById('message-container');
+      if (messageContainer) {
+          messageContainer.style.display = 'none';
+      }
+  }, 3000);  // Time in milliseconds (3000 = 3 seconds)
+</script>        
+        
 {% endblock %}
