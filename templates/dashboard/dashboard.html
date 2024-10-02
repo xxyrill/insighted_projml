@@ -74,7 +74,7 @@
 
             <!-- Upload and View Data Buttons -->
             <div class="mt-4 text-center">
-              {% if user_type == 'VPAA' %}
+              {% if user.is_authenticated %}
               <button type="button"
                       class="btn btn-primary btn-block"
                       data-toggle="modal"

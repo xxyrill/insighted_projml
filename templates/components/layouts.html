@@ -32,7 +32,7 @@
   <body id="body-pd">
     <div class="page-inner">
       <div>
-        <header class="header" id="header">
+        <header class="header bg-danger" id="header">
           <div class="header_toggle">
             <i class="bx bx-menu" id="header-toggle"></i>
           </div>
@@ -73,10 +73,13 @@
 
               </div>
             </div>
-            <a href="#" class="nav_link">
+              <a href="#" class="nav_link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
               <i class="bx bx-log-out nav_icon"></i>
               <span class="nav_name">Log Out</span>
-            </a>
+              </a>
+              <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                  {% csrf_token %}
+              </form>
           </nav>
         </div>
       </div>
@@ -99,5 +102,13 @@
     <script src="{% static 'assets/js/app.js' %}"></script>
     <script src="{% static 'assets/js/scripts.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
+    <script>
+        setTimeout(function() {
+            var messageContainer = document.getElementById('message-container');
+            if (messageContainer) {
+                messageContainer.style.display = 'none';
+            }
+        }, 5000);  // Time in milliseconds (5000 = 5 seconds)
+    </script>  
   </body>
 </html>

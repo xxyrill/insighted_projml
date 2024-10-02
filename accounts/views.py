@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -12,13 +12,10 @@ import csv
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
+        print(form)
         if form.is_valid():
             form.save()
-            user_type = request.user.user_type
-            context = {
-                'user_type': user_type
-            }
-            return render(request, 'dashboard/create_account.html', context)
+            #Swal.fire()
         else:
             print(form.errors)
     else:
@@ -53,6 +50,7 @@ def dashboardgraph(request):
     return render(request, 'dashboard/dashboard.html', context)
 
 def logout_view(request):
+    auth_logout(request)  # Logs the user out
     return render(request, 'authentications/login.html')
 
 def about_us(request):

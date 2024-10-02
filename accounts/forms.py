@@ -8,3 +8,6 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ('username', 'user_type')
+
+    def clean_password(self):
+        return self.cleaned_data['password']
