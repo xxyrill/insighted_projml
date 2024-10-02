@@ -1,0 +1,103 @@
+{% extends 'components/layouts.html' %}
+
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <div class="container text-center">
+            <br><br><br><br>
+            <p class="a">About Us</p>
+            <p class="b">Our Team</p>
+            <span class="c">We are a group of students from Mapúa Malayan Colleges Mindanao, dedicated to making an impact
+                through our capstone project</span>
+                <br>
+                <br>
+            <div class="f">
+                <div class="t row justify-content-center">
+                    <span class="q">Member 1: </span>
+                    <span class="e">[Marc Jeremy U. Cedeno]</span>
+                </div>
+                <div class="t row justify-content-center">
+                    <span class="q">Member 2: </span>
+                    <span class="e">[Alexis Miguel V. Dugadugaa]</span>
+                </div>
+                <div class="t row justify-content-center">
+                    <span class="q">Member 3: </span>
+                    <span class="e">[Gabriel Kreighton L. Masamayor]</span>
+                </div>
+            </div>
+            <br>
+            <p class="d">Purpose of the Software</p>
+            <span class="c">Our software, Mapúa insightED, is a data analytics solution designed to enhance educational
+                decision-making at Mapúa Malayan Colleges Mindanao. By leveraging advanced data analytics techniques,
+                our platform aims to provide valuable insights that help educators and administrators make informed
+                decisions to improve the educational experience and outcomes for students.</span>
+            <br>
+            <br>
+            <span class="c">Our goal is to empower educational institutions with the tools they need to drive
+                continuous improvement and achieve excellence in education.</span>
+        </div>
+    </div>
+
+    <div id="particles-js"></div>
+    
+    <!-- stats - count particles -->
+    <div class="count-particles">
+    </div>
+</body>
+<style>
+.a  {
+    font-size: 2em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    color: gray;
+}
+
+.b  {
+    font-size: 1.5em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    color: black;
+}
+
+.d  {
+    font-size: 1.75em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    color: black;
+}
+
+.q  {
+    font-weight: 900;
+    color: black;
+}
+
+.t  {
+    display: inline-flex;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.f  {
+    display: flex;
+    flex-direction: column;
+}
+
+.e  {
+    margin-left: .5%;
+}
+
+.c , .e {
+    color: black;
+}
+
+</style>
+</html>
+{% endblock %}

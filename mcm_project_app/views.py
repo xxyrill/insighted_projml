@@ -1,42 +1,24 @@
 import matplotlib
 import nltk
-import re
 matplotlib.use('Agg')  # Set the backend to Agg for non-interactive use
 import matplotlib.pyplot as plt
 import pandas as pd
-import io
 import seaborn as sns
 from django.http import HttpResponse
 from django.conf import settings
-import os
 from .utilities import csvPathFileName
-from wordcloud import WordCloud
-from textblob import TextBlob
-from django.http import JsonResponse
 from django.shortcuts import render
-from django.urls import reverse
 import base64
-import chardet
-import dask.dataframe as dd
-from accounts.models import UploadCSV
 from .utils import upload_csv_to_db
-from django.db import connection
 from django.contrib import messages
 from io import BytesIO
-from matplotlib.colors import LinearSegmentedColormap
 from nltk.sentiment import SentimentIntensityAnalyzer
-from wordcloud import WordCloud
 from django.db import IntegrityError
-from django.db import transaction
 from nltk.corpus import stopwords
-import string
 from django.http import JsonResponse
-from collections import Counter
-import numpy as np
 from accounts.models import UploadCSV
 import re
 from collections import Counter
-
 
 def login_page(request):
     return render(request, 'authentications/login.html')
@@ -182,10 +164,7 @@ def render_filter_page(request):
     }
     return render(request, 'dashboard.html', context)
 
-
-#####
-
-
+#1. Trend of Average Ratings per Term
 def plot_ratings_trend(request):
     # Step 1: Query the UploadCSV table to get the required data
     data = UploadCSV.objects.all().values('crs_year', 'question_1', 'question_2', 'question_3', 'question_4',
@@ -241,7 +220,6 @@ def plot_ratings_trend(request):
     # Step 9: Convert image to base64 string
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
     return JsonResponse({'image': img_base64})
-
 
 # 2. Department-wise Average Ratings
 def plot_department_average_ratings(request):
@@ -316,6 +294,7 @@ def plot_department_average_ratings(request):
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
     return JsonResponse({'image': img_base64})
 
+#3. Distribution of Ratings
 def plot_rating_distribution(request):
     # Step 1: Query the UploadCSV table to get the required data (all question ratings)
     data = UploadCSV.objects.all().values('question_1', 'question_2', 'question_3', 'question_4',
@@ -381,9 +360,8 @@ def plot_rating_distribution(request):
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
     return JsonResponse({'image': img_base64})
 
-
+#4. Pie Chart Comments
 nltk.download('stopwords')
-
 # Function to get word frequencies
 def get_word_frequencies(comments):
     # Combine all comments into one text
@@ -438,7 +416,7 @@ def plot_comments_pie_chart(request):
         'instructor_chart': instructor_chart_base64,
         'course_chart': course_chart_base64
     })
-
+# 5. Length of Comments Analysis
 def plot_length_of_comments_analysis(request):
     # Step 1: Query the UploadCSV table to get comments data
     data = UploadCSV.objects.all().values('question_31', 'question_32')  # Adjust these fields as needed
@@ -497,6 +475,7 @@ def plot_length_of_comments_analysis(request):
     # Step 8: Render the template
     return JsonResponse({'image': histogram_base64})
 
+# 9. Sentiment Analysis Over Time
 def plot_sentiment_analysis_over_time(request):
     # Calculate sentiment scores
     df = calculate_sentiment_scores()
@@ -542,6 +521,7 @@ def plot_sentiment_analysis_over_time(request):
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
     return JsonResponse({'image': img_base64})
 
+# 12. Comparison of Ratings and Comment Length
 def plot_comparison_of_ratings_and_comment_length(request):
     # Step 1: Query your data
     data = UploadCSV.objects.all().values(
@@ -697,8 +677,7 @@ def plot_instructor_leaderboard(request):
     # Return the image in JSON format
     return JsonResponse({'image': image_base64})
 
-##### GRAPHS WITH TWO FILTERS
-
+# 11. Pareto Analysis of Courses
 def plot_pareto_analysis(request):
     # Step 1: Query course data and ratings from the database (adjust field names accordingly)
     data = UploadCSV.objects.all().values('crs_name', 'question_1', 'question_2', 'question_3', 'question_4')  # Modify questions as per your needs
