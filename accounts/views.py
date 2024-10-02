@@ -16,6 +16,7 @@ def register_view(request):
         if form.is_valid():
             form.save()
             #Swal.fire()
+            return render( 'dashboard/create_account.html', )
         else:
             print(form.errors)
     else:
