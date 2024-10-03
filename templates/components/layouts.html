@@ -36,9 +36,6 @@
           <div class="header_toggle">
             <i class="bx bx-menu" id="header-toggle"></i>
           </div>
-          <div class="header_img">
-            <img src="https://i.imgur.com/hczKIze.jpg" alt="" />
-          </div>
         </header>
         <div class="l-navbar" id="nav-bar">
           <nav class="nav">
@@ -49,31 +46,27 @@
               </a>
               <div class="nav_list">
                 <a href="{% url 'home' %}" class="nav_link {% if request.path == '' %} active {% endif %}">
-                  <i class="bx bx-grid-alt nav_icon"></i>
+                  <i class="bx bx-user nav_icon"></i>
                   <span class="nav_name">Home</span>
                 </a>
                 <a href="{% url 'dashboard' %}" class="nav_link {% if request.path == 'dashboard/' %} active {% endif %}">
-                  <i class="bx bx-user nav_icon"></i>
+                  <i class="bx bx-grid-alt nav_icon"></i>
                   <span class="nav_name">Dashboard</span>
                 </a>
                 <a href="{% url 'about' %}" class="nav_link">
-                  <i class="bx bx-message-square-detail nav_icon"></i>
+                  <i class="bx bx-info-circle nav_icon"></i>
                   <span class="nav_name">About Us</span>
-                </a>
-                <a href="#" class="nav_link">
-                  <i class="bx bx-bookmark nav_icon"></i>
-                  <span class="nav_name">Admin</span>
                 </a>
               {% if user_type == 'IDEALS' %}
               <a href="{% url 'register' %}" class="nav_link">
-                  <i class="bx bx-bookmark nav_icon"></i>
+                  <i class="bx bx-user-plus nav_icon"></i>
                   <span class="nav_name">Create Account</span>
                 </a>
               {% endif %}
 
               </div>
             </div>
-              <a href="#" class="nav_link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+              <a href="#" class="nav_link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
               <i class="bx bx-log-out nav_icon"></i>
               <span class="nav_name">Log Out</span>
               </a>

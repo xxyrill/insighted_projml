@@ -38,8 +38,6 @@
       </div>
   {% endif %}
 
-
-
   <div class="row">
     <div class="col-md-4">
       <div class="card shadow rounded d-flex justify-content-center align-items-center">
@@ -60,7 +58,12 @@
                   <option value="sentiment_over_time">Sentiment Over Time</option>
                   <option value="pareto_analysis">Pareto Analysis</option>
                   <option value="ratings_vs_comment_length">Ratings VS Comment Length</option>
-                  <option value="instructor_leaderboard">Instructor Leaderboard</option>
+                  <option value="avg_rating_ATYCB">ATYCB Faculty Average Rating</option>
+                  <option value="avg_rating_CAS">CAS Faculty Average Rating</option>
+                  <option value="avg_rating_CCIS">CCIS Faculty Average Rating</option>
+                  <option value="avg_rating_CEA">CEA Faculty Average Rating</option>
+                  <option value="avg_rating_CHS">CHS Faculty Average Rating</option>
+                  <option value="avg_rating_NSTP">NSTP Faculty Average Rating</option>
                 </select>
               </div>
 
@@ -134,27 +137,48 @@
     
     var opt = '';
     switch (x) {
+      case 'ratings_trend':
+        opt = 'ratings_trend.pdf';
+        break;        
       case 'comments_pie_chart':
-        opt = 'cpc.pdf';
+        opt = 'comments_pie_chart.pdf';
         break;
       case 'rating_distribution':
-        opt = 'rd.pdf';
+        opt = 'rating_distribution.pdf';
         break;
       case 'comment_lengths':
-        opt = 'cl.pdf';
+        opt = 'comment_lengths.pdf';
         break;
       case 'department_avg_ratings':
-        opt = 'dar.pdf';
+        opt = 'department_avg_ratings.pdf';
         break;
       case 'sentiment_over_time':
-        opt = 'sot.pdf';
+        opt = 'sentiment_over_time.pdf';
         break;
       case 'pareto_analysis':
-        opt = 'pa.pdf';
+        opt = 'pareto_analysis.pdf';
         break;
       case 'ratings_vs_comment_length':
-        opt = 'rvca.pdf';
+        opt = 'ratings_vs_comment_length.pdf';
         break;
+      case 'avg_rating_ATYCB':
+        opt = 'avg_rating_ATYCB.pdf';
+        break;
+      case 'avg_rating_CAS':
+        opt = 'avg_rating_CAS.pdf';
+        break;
+      case 'avg_rating_CCIS':
+        opt = 'avg_rating_CCIS.pdf';
+        break;
+      case 'avg_rating_CEA':
+        opt = 'avg_rating_CEA.pdf';
+        break;
+      case 'avg_rating_CHS':
+        opt = 'avg_rating_CHS.pdf';
+        break;
+      case 'avg_rating_NSTP':
+        opt = 'avg_rating_NSTP.pdf';
+        break;          
       default:
         opt = 'id.pdf';
     }
@@ -233,7 +257,25 @@
                 break;        
             case 'instructor_leaderboard':
                 graphUrl = '/plot_instructor_leaderboard/';
-                break;                   
+                break;
+            case 'avg_rating_ATYCB':
+                graphUrl = '/plot_average_ratings_ATYCB/';
+                break;    
+            case 'avg_rating_CAS':
+                graphUrl = '/plot_average_ratings_CAS/';
+                break;
+            case 'avg_rating_CCIS':
+                graphUrl = '/plot_average_ratings_CCIS/';
+                break;  
+            case 'avg_rating_CEA':
+                graphUrl = '/plot_average_ratings_CEA/';
+                break;    
+            case 'avg_rating_CHS':
+                graphUrl = '/plot_average_ratings_CHS/';
+                break;
+            case 'avg_rating_NSTP':
+                graphUrl = '/plot_average_ratings_NSTP/';
+                break;                  
             default:
                 graphUrl = '';
         }
