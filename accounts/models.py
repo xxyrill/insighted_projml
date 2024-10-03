@@ -11,15 +11,10 @@ class CustomUser(AbstractUser):
         ('DEANS', 'Deans'),
     )
 
-    username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=150)
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
-
-    # user_type = models.CharField(max_length=10, choices=USER_TYPES, default='DEANS')
 
     def __str__(self):
         return self.username
-
 
 class UploadCSV (models.Model):
     survey_name = models.CharField(max_length=255)
@@ -31,7 +26,7 @@ class UploadCSV (models.Model):
     dept_name = models.CharField(max_length=255)
     crs_dir = models.CharField(max_length=255)
     resp_fac = models.CharField(max_length=255)
-    eval_id = models.IntegerField()
+    eval_id = models.CharField(max_length=255)
     eval_uname = models.CharField(max_length=255)
     eval_email = models.CharField(max_length=255)
     t_submit = models.CharField(max_length=255)

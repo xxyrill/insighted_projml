@@ -1,0 +1,26 @@
+<!-- templates/register.html -->
+{% extends 'components/layouts.html' %}
+{% block content %}
+<div class="container">
+    <h2>Create Account</h2>
+
+    <!-- Display any success or error messages -->
+    {% if messages %}
+        <div id="message-container">
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Registration Form -->
+    <form method="POST" action="">
+        {% csrf_token %}
+        <!-- Render all form fields -->
+        {{ form.as_p }}
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-success">Create Account</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,28 +1,33 @@
+from django import forms
+from .forms import UserCreationForm
 from django.shortcuts import render, redirect
+from .models import CustomUser, UploadCSV
+from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from .forms import CustomUserCreationForm
-from .models import UploadCSV
 from django.utils import timezone
 import csv
 
+from django.shortcuts import render, redirect
+from .forms import CustomUserCreationForm  # Import your form from forms.py
 
-def register_view(request):
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import CustomUserCreationForm  # Import your custom form
+
+def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            # Display a success message on the same page
-            messages.success(request, "Account created successfully!")
-        else:
-            print(form.errors)
+            form.save()  # Save the form and create the user
+            messages.success(request, 'Account created successfully!')
     else:
         form = CustomUserCreationForm()
 
-    return render(request, 'dashboard/create_account.html', {'form': form})
+    return render(request, 'dashboard/register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
