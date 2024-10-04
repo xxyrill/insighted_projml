@@ -52,7 +52,15 @@ def upload_csv_to_db(csv_file_path):
     except Exception as e:
         print(f"Error while deleting records: {e}")
 
-    # Step 2: Insert new data into the UploadCSV table
+    # Step 2: Read the CSV file into a DataFrame
+    try:
+        df = pd.read_csv(csv_file_path)  # Load the CSV file
+        print("CSV file loaded successfully.")
+    except Exception as e:
+        print(f"Error loading CSV file: {e}")
+        return  # Exit the function if there is an error loading the CSV
+
+    # Step 3: Insert new data into the UploadCSV table
     for _, row in df.iterrows():
         try:
             UploadCSV.objects.create(
@@ -63,7 +71,7 @@ def upload_csv_to_db(csv_file_path):
         except IntegrityError as e:
             print(f"Error inserting row: {e}")  # Log or handle the error if necessary
 
-    # Step 3: Extract unique values for filters
+    # Step 4: Extract unique values for filters
     departments = df['deptname'].unique()
     instructors = df['resp_fac'].unique()
     courses = df['crs_name'].unique()
