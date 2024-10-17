@@ -7,8 +7,12 @@ class CustomUser(AbstractUser):
     USER_TYPES = (
         ('VPAA', 'Vice President of Academic Affairs'),
         ('IDEALS', 'Ideals'),
-        ('HR', 'HR'),
+        ('QAEO', 'QAEO'),
         ('DEANS', 'Deans'),
+        ('ATYCB', 'ATYCB DEAN'),
+        ('CAS', 'CAS DEAN'),
+        ('CEA', 'CEA DEAN'),
+        ('CCIS', 'CCIS DEAN'),
     )
 
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
@@ -42,6 +46,7 @@ class UploadCSV (models.Model):
     research_1 = models.CharField(max_length=255)
     research_2 = models.CharField(max_length=255)
     research_3 = models.CharField(max_length=255)
+    # I. Presence/Guidance - Question
     question_1 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -58,6 +63,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='The instructor showed interest in student progress.')
+    # II. Collaborative Learning
     question_4 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -88,6 +94,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='Tasks deployed require collaboration among students.')
+    # III. Active Learning
     question_10 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -103,6 +110,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='The instructor provides students access to resources that enrich the course content.')
+    # IV. Content Knowledge and Proficiency
     question_13 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -118,6 +126,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='The instructor explains the significance of the lessons.')
+    # V. Course Expectations
     question_16 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -133,6 +142,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='Course outcomes are clearly presented.')
+    # VI. Clarity/Instructions
     question_19 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -148,6 +158,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='The instructor provides clear guidelines and/or rubrics of the learning activities.')
+    # VII. Feedback
     question_22 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -163,6 +174,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='The instructor returns assessments in a timely fashion.')
+    # VIII. Inclusivity
     question_25 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
@@ -178,6 +190,7 @@ class UploadCSV (models.Model):
         MaxValueValidator(5)
     ], default=0,
         help_text='Quality of work is praised.')
+    # IX. Outcome-Based Education
     question_28 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)

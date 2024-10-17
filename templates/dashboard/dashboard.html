@@ -1,321 +1,338 @@
 {% extends 'components/layouts.html' %}
 
-{% load static %} <!-- Filter Form -->
+{% load static %}
 
 {% block content %}
 
-<!-- Delete db button confirmation Modal -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to delete all existing data?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <form method="POST" action="{% url 'delete_data' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-    
-{% include 'dashboard/upload_data.html' %}
-<div class="container-fluid pt-4">
-  {% if messages %}
-      <div class="alert-container" id="message-container">
-          {% for message in messages %}
-              <div class="alert alert-success fade-out">{{ message }}</div>
-          {% endfor %}
-      </div>
-  {% endif %}
-
-  <div class="row">
-    <div class="col-md-4">
-      <div class="card shadow rounded d-flex justify-content-center align-items-center">
-        <div class="card-body w-100" style="height: 700px;" >
-          <div class="container-fluid text-center">
-            <h5 class="card-title text-center font-weight-bold">Filters</h5>
-            <!-- Filter Form -->
-            <form method="GET" action="{% url 'generate_graph' %}">
-              <!-- Graph Select -->
-              <div class="form-group">
-                <label for="graph">Graph:</label>
-                <select class="form-control" id="graph" name="graph" onchange="myFunction()">
-                  <option value="ratings_trend">Ratings Trend</option>
-                  <option value="department_avg_ratings">Department Average Ratings</option>
-                  <option value="rating_distribution">Rating Distribution</option>
-                  <option value="comments_pie_chart">Comments Pie Chart</option>
-                  <option value="comment_lengths">Comment Lengths</option>
-                  <option value="sentiment_over_time">Sentiment Over Time</option>
-                  <option value="pareto_analysis">Pareto Analysis</option>
-                  <option value="ratings_vs_comment_length">Ratings VS Comment Length</option>
-                  <option value="avg_rating_ATYCB">ATYCB Faculty Average Rating</option>
-                  <option value="avg_rating_CAS">CAS Faculty Average Rating</option>
-                  <option value="avg_rating_CCIS">CCIS Faculty Average Rating</option>
-                  <option value="avg_rating_CEA">CEA Faculty Average Rating</option>
-                  <option value="avg_rating_CHS">CHS Faculty Average Rating</option>
-                  <option value="avg_rating_NSTP">NSTP Faculty Average Rating</option>
-                </select>
-              </div>
-
-              <!-- Filter and Clear Filters Buttons -->
-
- <div class="d-flex justify-content-between">
-     <button type="submit" class="btn btn-primary" style="width: 10rem">Filter</button>
-     <button type="button" id="clear-filters-btn" class="btn btn-secondary" style="width: 10rem">Clear Filters</button>
- </div>
-            </form>
-
-            <!-- Upload and View Data Buttons -->
-            <div class="mt-4 text-center">
-              {% if user.is_authenticated %}
-              <button type="button"
-                      class="btn btn-primary btn-block"
-                      data-toggle="modal"
-                      data-target="#uploadDataModal"
-                      data-backdrop="false">
-                Upload Data
-              </button>
-              {% endif %}
-              <button type="button"
-                      id="view-data-btn"
-                      class="btn btn-primary btn-block mt-2">
-                View Data
-              </button>
-            <button href="javascript:void(0)" class="btn-download btn btn-primary btn-block mt-2">
-                Download PDF
-            </button>
-            {% if user.is_authenticated %}
-    <button type="button"
-            id="delete-data-btn"
-            class="btn btn-danger btn-block mt-2"
-            data-toggle="modal"
-            data-target="#confirmDeleteModal">
-        Delete Existing Data
-    </button>
-    {% endif %}
+    <!-- Delete db button confirmation Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
+         aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete all existing data?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form method="POST" action="{% url 'delete_data' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
 
-    <div class="col-md-8">
-      <div class="card shadow rounded">
-        <div class="card-body" style="height: 700px; overflow-y: auto;">
-          <div id="graph-container" class="container-fluid">
-            <!-- Graph content will be loaded here -->
-          </div>
-        </div>
-      </div>
-    </div>
-  
-  
-  </div>
-</div>
+    {% include 'dashboard/upload_data.html' %}
     
+    <div class="container-fluid pt-4">
+        {% if messages %}
+            <div class="alert-container" id="message-container">
+                {% for message in messages %}
+                    <div class="alert alert-success fade-out">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow rounded d-flex justify-content-center align-items-center">
+                    <div class="card-body w-100" style="height: 700px;">
+                        <div class="container-fluid text-center">
+                            <h5 class="card-title text-center font-weight-bold">Filters</h5>
+                            <!-- Filter Form -->
+                            <form method="GET" action="{% url 'generate_graph' %}">
+                                <!-- Graph Select -->
+                                <div class="form-group">
+                                    <label for="department">Department</label>
+                                    <select class="form-control" id="department" name="department">
+                                        <option value=""></option>
+                                        <option value="avg_rating_ATYCB">ATYCB Average Rating</option>
+                                        <option value="avg_rating_CAS">CAS Average Rating</option>
+                                        <option value="avg_rating_CCIS">CCIS Average Rating</option>
+                                        <option value="avg_rating_CEA">CEA Average Rating</option>
+                                        <option value="avg_rating_CHS">CHS Average Rating</option>
+                                        <option value="avg_rating_NSTP">NSTP Average Rating</option>
+                                    </select>
+                                </div>
+                                <!-- Instructor Select -->
+                                <div class="form-group">
+                                    <label for="instructor">Instructor</label>
+                                    <select class="form-control" id="instructor" name="instructor">
+                                        <option value=""></option>
+                                        {% for instructor in instructors %}
+                                            <option value="{{ instructor }}">{{ instructor }}</option>
+                                        {% empty %}
+                                            <option value="">No instructors available</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- Course Select -->
+                                <div class="form-group">
+                                    <label for="course">Course</label>
+                                    <select class="form-control" id="course" name="course">
+                                        <option value="All Courses"></option>
+                                        {% for course in courses %}
+                                            <option value="{{ course }}">{{ course }}</option>
+                                        {% empty %}
+                                            <option value="">No courses available</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- Term Select -->
+                                <div class="form-group">
+                                    <label for="term">Term</label>
+                                    <select class="form-control" id="term">
+                                        <option>All Terms</option>
+                                        <option>1st Term</option>
+                                        <option>2nd Term</option>
+                                    </select>
+                                </div>
+                                <!-- Filter and Clear Filters Buttons -->
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-primary" style="width: 10rem">Filter</button>
+                                    <button type="button" id="clear-filters-btn" class="btn btn-secondary"
+                                            style="width: 10rem">Clear Filters
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Upload and View Data Buttons -->
+                            <div class="mt-4 text-center">
+                                {% if user.is_authenticated %}
+                                    <button type="button"
+                                            class="btn btn-primary btn-block"
+                                            data-toggle="modal"
+                                            data-target="#uploadDataModal"
+                                            data-backdrop="false">
+                                        Upload Data
+                                    </button>
+                                {% endif %}
+                                <button type="button"
+                                        id="view-data-btn"
+                                        class="btn btn-primary btn-block mt-2">
+                                    View Data
+                                </button>
+                                <button href="javascript:void(0)" class="btn-download btn btn-primary btn-block mt-2">
+                                    Download PDF
+                                </button>
+                                {% if user.is_authenticated %}
+                                    <button type="button"
+                                            id="delete-data-btn"
+                                            class="btn btn-danger btn-block mt-2"
+                                            data-toggle="modal"
+                                            data-target="#confirmDeleteModal">
+                                        Delete Existing Data
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow rounded">
+                    <div class="card-body" style="height: 700px; overflow-y: auto;">
+                        <div id="graph-container" class="container-fluid">
+                            <!-- Graph content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="{% static 'assets/js/jspdf.debug.js' %}"></script>
-<script src="{% static 'assets/js/html2canvas.min.js' %}"></script>
-<script src="{% static 'assets/js/html2pdf.min.js' %}"></script>
-<script src="{% static 'assets/js/jquery.min.js' %}"></script>
-    
+    <script src="{% static 'assets/js/html2canvas.min.js' %}"></script>
+    <script src="{% static 'assets/js/html2pdf.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+
     <script>
-  function myFunction() {
-    var x = document.getElementById("graph").value;
-    // document.getElementById("demo").innerHTML = x;
-    console.clear();
-    console.log(x);
-    
-    var opt = '';
-    switch (x) {
-      case 'ratings_trend':
-        opt = 'ratings_trend.pdf';
-        break;        
-      case 'comments_pie_chart':
-        opt = 'comments_pie_chart.pdf';
-        break;
-      case 'rating_distribution':
-        opt = 'rating_distribution.pdf';
-        break;
-      case 'comment_lengths':
-        opt = 'comment_lengths.pdf';
-        break;
-      case 'department_avg_ratings':
-        opt = 'department_avg_ratings.pdf';
-        break;
-      case 'sentiment_over_time':
-        opt = 'sentiment_over_time.pdf';
-        break;
-      case 'pareto_analysis':
-        opt = 'pareto_analysis.pdf';
-        break;
-      case 'ratings_vs_comment_length':
-        opt = 'ratings_vs_comment_length.pdf';
-        break;
-      case 'avg_rating_ATYCB':
-        opt = 'avg_rating_ATYCB.pdf';
-        break;
-      case 'avg_rating_CAS':
-        opt = 'avg_rating_CAS.pdf';
-        break;
-      case 'avg_rating_CCIS':
-        opt = 'avg_rating_CCIS.pdf';
-        break;
-      case 'avg_rating_CEA':
-        opt = 'avg_rating_CEA.pdf';
-        break;
-      case 'avg_rating_CHS':
-        opt = 'avg_rating_CHS.pdf';
-        break;
-      case 'avg_rating_NSTP':
-        opt = 'avg_rating_NSTP.pdf';
-        break;          
-      default:
-        opt = 'id.pdf';
-    }
-    options = {
-      margin: 0.1,
-      filename: opt,
-      image: {
-        type: 'jpeg',
-        quality: 1000
-      },
-      html2canvas: {
-        scale: 5
-      },
-      jsPDF: {
-        unit: 'in',
-        format: 'letter',
-        orientation: 'portrait'
-      }
-    }
+        function myFunction() {
+            var x = document.getElementById("graph").value;
+            // document.getElementById("demo").innerHTML = x;
+            console.clear();
+            console.log(x);
+            
+            var opt = '';
+            switch (x) {
+                case 'avg_rating_ATYCB':
+                    opt = 'avg_rating_ATYCB.pdf';
+                    break;
+                case 'avg_rating_CAS':
+                    opt = 'avg_rating_CAS.pdf';
+                    break;
+                case 'avg_rating_CCIS':
+                    opt = 'avg_rating_CCIS.pdf';
+                    break;
+                case 'avg_rating_CEA':
+                    opt = 'avg_rating_CEA.pdf';
+                    break;
+                case 'avg_rating_CHS':
+                    opt = 'avg_rating_CHS.pdf';
+                    break;
+                case 'avg_rating_NSTP':
+                    opt = 'avg_rating_NSTP.pdf';
+                    break;
+                default:
+                    opt = 'id.pdf';
+            }
+            options = {
+                margin: 0.1,
+                filename: opt,
+                image: {
+                    type: 'jpeg',
+                    quality: 1000
+                },
+                html2canvas: {
+                    scale: 5
+                },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'letter',
+                    orientation: 'portrait'
+                }
+            }
 
-    $('.btn-download').click(function (e) {
-      e.stopImmediatePropagation();
-      element = document.getElementById('graph-container');
-      html2pdf().from(element).set(options).save();
-      document.getElementById("demo").innerHTML = "";
-      // setInterval(function () {
-      //    window.location.reload();
-      // }, 500);
-    });
-  }
-</script>
-    
-<script>
-    // Event listener for clearing filters
-    document.getElementById('clear-filters-btn').addEventListener('click', function() {
-        // Reset filter selections to their default values
-        document.getElementById('graph').selectedIndex = 0; // Reset graph select
-        document.getElementById('department').selectedIndex = 0; // Reset department select
-        document.getElementById('instructor').selectedIndex = 0; // Reset instructor select
-        document.getElementById('course').selectedIndex = 0; // Reset course select
-
-        // Clear the graph container to remove any graphs
-        document.getElementById('graph-container').innerHTML = '';
-    });
-
-    // Event listener for the "View Data" button
-    document.getElementById("view-data-btn").addEventListener("click", function() {
-        const selectedGraph = document.getElementById("graph").value;
-        let graphUrl = '';
-
-        // Define the URL based on selected graph
-        switch (selectedGraph) {
-            case 'ratings_trend':
-                graphUrl = '/plot_ratings_trend/';
-                break;
-            case 'department_avg_ratings':
-                graphUrl = '/plot_department_average_ratings/';
-                break;
-            case 'rating_distribution':
-                graphUrl = '/plot_rating_distribution/';
-                break;
-            case 'comments_pie_chart':
-                graphUrl = '/plot_comments_pie_chart/';
-                break;
-            case 'comment_lengths':
-                graphUrl = '/plot_length_of_comments_analysis/';
-                break;
-            case 'sentiment_over_time':
-                graphUrl = '/plot_sentiment_analysis_over_time/';
-                break;      
-            case 'pareto_analysis':
-                graphUrl = '/plot_pareto_analysis/';
-                break;      
-            case 'ratings_vs_comment_length':
-                graphUrl = '/plot_comparison_of_ratings_and_comment_length/';
-                break;        
-            case 'instructor_leaderboard':
-                graphUrl = '/plot_instructor_leaderboard/';
-                break;
-            case 'avg_rating_ATYCB':
-                graphUrl = '/plot_average_ratings_ATYCB/';
-                break;    
-            case 'avg_rating_CAS':
-                graphUrl = '/plot_average_ratings_CAS/';
-                break;
-            case 'avg_rating_CCIS':
-                graphUrl = '/plot_average_ratings_CCIS/';
-                break;  
-            case 'avg_rating_CEA':
-                graphUrl = '/plot_average_ratings_CEA/';
-                break;    
-            case 'avg_rating_CHS':
-                graphUrl = '/plot_average_ratings_CHS/';
-                break;
-            case 'avg_rating_NSTP':
-                graphUrl = '/plot_average_ratings_NSTP/';
-                break;                  
-            default:
-                graphUrl = '';
+            $('.btn-download').click(function (e) {
+                e.stopImmediatePropagation();
+                element = document.getElementById('graph-container');
+                html2pdf().from(element).set(options).save();
+                document.getElementById("demo").innerHTML = "";
+                // setInterval(function () {
+                //    window.location.reload();
+                // }, 500);
+            });
         }
+    </script>
+    
+    <!-- jscript for the department average rating graph -->
+    <script>
+        function renderDepartmentGraph(selectedGraph) {
+            let graphUrl = '';
 
-        console.log("View Data button clicked, fetching graph from:", graphUrl);
-
-        if (graphUrl) {
-            fetch(graphUrl)
+            // Define the URL based on selected graph
+            switch (selectedGraph) {
+                case 'avg_rating_ATYCB':
+                    graphUrl = '/plot_average_ratings_ATYCB/';
+                    break;
+                case 'avg_rating_CAS':
+                    graphUrl = '/plot_average_ratings_CAS/';
+                    break;
+                case 'avg_rating_CCIS':
+                    graphUrl = '/plot_average_ratings_CCIS/';
+                    break;
+                case 'avg_rating_CEA':
+                    graphUrl = '/plot_average_ratings_CEA/';
+                    break;
+                case 'avg_rating_CHS':
+                    graphUrl = '/plot_average_ratings_CHS/';
+                    break;
+                case 'avg_rating_NSTP':
+                    graphUrl = '/plot_average_ratings_NSTP/';
+                    break;
+                default:
+                    return Promise.reject('Invalid graph selection.');
+            }
+            return fetch(graphUrl)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('No data available.');
-                    }
+                    if (!response.ok) throw new Error('Failed to load department graph.');
                     return response.json();
                 })
                 .then(data => {
-                    // Handle the response based on graph type
-                    if (selectedGraph === 'comments_pie_chart') {
-                        // For pie charts (instructor and course comments)
-                        const instructorImgTag = `<img src="data:image/png;base64,${data.instructor_chart}" alt="Instructor Comments Pie Chart" class="img-fluid" />`;
-                        const courseImgTag = `<img src="data:image/png;base64,${data.course_chart}" alt="Course Comments Pie Chart" class="img-fluid" />`;
-
-                        document.getElementById('graph-container').innerHTML = `
-                            ${instructorImgTag}
-                            ${courseImgTag}
-                        `;
-                    } else if (data.image) {
-                        // For other graphs
-                        const imgTag = `<img src="data:image/png;base64,${data.image}" alt="${selectedGraph} Graph" class="img-fluid" />`;
-                        document.getElementById('graph-container').innerHTML = imgTag;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching the graph:', error);
-                    document.getElementById('graph-container').innerHTML = `<p>Error loading graph: ${error.message}</p>`;
+                    const imgTag = `<img src="data:image/png;base64,${data.image}"
+                            alt="${selectedGraph} Graph" class="img-fluid" />`;
+                    document.getElementById('graph-container').innerHTML = imgTag;
                 });
-        } else {
-            document.getElementById('graph-container').innerHTML = '<p>Please select a graph type.</p>';
         }
-    });
+    </script>
+
+    <!-- Event listener for clearing filters -->
+    <script>
+        document.getElementById('clear-filters-btn').addEventListener('click', function () {
+            document.getElementById('department').selectedIndex = 0;  // Reset graph select
+            document.getElementById('instructor').selectedIndex = 0;  // Reset instructor select
+            document.getElementById('course').selectedIndex = 0;  // Reset course select
+
+            // Clear the graph container
+            document.getElementById('graph-container').innerHTML = '';
+        });
+    </script>
+
+    <!-- Event listener for "View Data" button -->
+    <script>
+        document.getElementById("view-data-btn").addEventListener("click", function () {
+            const selectedGraph = document.getElementById("department").value;
+            const instructorName = document.getElementById("instructor").value;
+
+            // Clear graph container before rendering new graphs
+            document.getElementById('graph-container').innerHTML = '';
+
+            if (selectedGraph) {
+                renderDepartmentGraph(selectedGraph).then(() => {
+                    // If instructor is selected, render the instructor graph after department graph
+                    if (instructorName) {
+                        loadInstructorGraph(instructorName);
+                    }
+                }).catch(error => console.error('Department graph error:', error));
+            } else if (instructorName) {
+                // If no department graph is selected, render only the instructor graph
+                loadInstructorGraph(instructorName);
+            } else {
+                document.getElementById('graph-container').innerHTML = '<p>Please select a graph or instructor.</p>';
+            }
+        });
+
+    </script>
+    
+    <!-- jscript for the instructor average rating graph -->
+<script>
+    function loadInstructorGraph(instructorName) {
+        fetch(`/plot_instructor_ratings/${instructorName}/`)
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to load instructor graph.");
+                return response.json();
+            })
+            .then(data => {
+                const newGraphDiv = document.createElement("div");
+                newGraphDiv.classList.add("graph-section", "mt-4", "p-3", "rounded");
+
+                newGraphDiv.innerHTML = `
+                    
+                    <img src="data:image/png;base64,${data.image}"
+                         alt="${instructorName} Ratings Graph" class="img-fluid" />
+                `;
+
+                document.getElementById('graph-container').appendChild(newGraphDiv);
+                scrollToBottom();  // Scroll to bottom after adding the graph
+            })
+            .catch(error => {
+                console.error("Error fetching instructor graph:", error);
+                const errorMsg = `<p> ${error.message}</p>`;
+                document.getElementById('graph-container').insertAdjacentHTML('beforeend', errorMsg);
+            });
+    }
+
+    // Define the scrollToBottom function to scroll the graph container to the bottom
+    function scrollToBottom() {
+        const container = document.getElementById('graph-container');
+        container.scrollTop = container.scrollHeight;
+    }
 </script>
 
 
+    <!-- Function to scroll to the bottom of the graph container -->
+    <script>
+        function scrollToBottom() {
+            const container = document.getElementById("graph-container");
+            container.scrollTop = container.scrollHeight;
+    </script>
+    
 {% endblock %}

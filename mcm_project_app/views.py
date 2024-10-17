@@ -1,14 +1,20 @@
 import matplotlib
+import plotly.express as px
+import plotly.graph_objects as go
 import nltk
-matplotlib.use('Agg')  # Set the backend to Agg for non-interactive use
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import base64
+import re
+import numpy as np
+from io import BytesIO
+
+matplotlib.use('Agg')  # Set the backend to Agg for non-interactive use
 from django.http import HttpResponse
 from django.conf import settings
 from .utilities import csvPathFileName
 from django.shortcuts import render
-import base64
 from .utils import upload_csv_to_db
 from django.contrib import messages
 from io import BytesIO
@@ -17,8 +23,8 @@ from django.db import IntegrityError
 from nltk.corpus import stopwords
 from django.http import JsonResponse
 from accounts.models import UploadCSV
-import re
-from collections import Counter
+from django.core.cache import cache
+from django.shortcuts import render
 
 def login_page(request):
     return render(request, 'authentications/login.html')
@@ -172,221 +178,462 @@ def render_filter_page(request):
     }
     return render(request, 'dashboard.html', context)
 
-#1. Trend of Average Ratings per Term
-def plot_ratings_trend(request):
-    # Step 1: Query the UploadCSV table to get the required data
-    data = UploadCSV.objects.all().values('crs_year', 'question_1', 'question_2', 'question_3', 'question_4',
-                                          'question_5', 'question_6', 'question_7', 'question_8', 'question_9',
-                                          'question_10', 'question_11', 'question_12', 'question_13', 'question_14',
-                                          'question_15', 'question_16', 'question_17', 'question_18', 'question_19',
-                                          'question_20', 'question_21', 'question_22', 'question_23', 'question_24',
-                                          'question_25', 'question_26', 'question_27', 'question_28', 'question_29',
-                                          'question_30', 'question_31', 'question_32')
-
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    import pandas as pd
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate the graph.", status=400)
-
-    # Step 4: Convert all question columns to numeric, replacing errors with NaN
-    question_columns = ['question_1', 'question_2', 'question_3', 'question_4', 'question_5',
-                        'question_6', 'question_7', 'question_8', 'question_9', 'question_10',
-                        'question_11', 'question_12', 'question_13', 'question_14', 'question_15',
-                        'question_16', 'question_17', 'question_18', 'question_19', 'question_20',
-                        'question_21', 'question_22', 'question_23', 'question_24', 'question_25',
-                        'question_26', 'question_27', 'question_28', 'question_29', 'question_30',
-                        'question_31', 'question_32',]
-
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    df[question_columns] = df[question_columns].fillna(0)
-
-    # Step 5: Calculate total ratings per row by summing the question columns
-    df['total_rating'] = df[question_columns].sum(axis=1)
-
-    # Step 6: Group by 'crs_year' and calculate the average total rating
-    avg_ratings = df.groupby('crs_year')['total_rating'].mean().reset_index()
-
-    # Step 7: Plot the average ratings trend over terms
-    plt.figure(figsize=(10, 6))
-    plt.plot(avg_ratings['crs_year'], avg_ratings['total_rating'], marker='o', linestyle='-', color='b')
-    plt.title('Trend of Average Ratings Over Terms')
-    plt.xlabel('Academic Term')
-    plt.ylabel('Average Rating')
-    plt.grid(True)
-
-    # Step 8: Save the plot to a BytesIO object
-    from io import BytesIO
-    import base64
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Step 9: Convert image to base64 string
-    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    return JsonResponse({'image': img_base64})
-
-# 2. Department-wise Average Ratings
-def plot_department_average_ratings(request):
-    # Step 1: Query the UploadCSV table to get the required data including department and ratings
-    data = UploadCSV.objects.all().values('dept_name', 'question_1', 'question_2', 'question_3', 'question_4',
-                                          'question_5', 'question_6', 'question_7', 'question_8', 'question_9',
-                                          'question_10', 'question_11', 'question_12', 'question_13', 'question_14',
-                                          'question_15', 'question_16', 'question_17', 'question_18', 'question_19',
-                                          'question_20', 'question_21', 'question_22', 'question_23', 'question_24',
-                                          'question_25', 'question_26', 'question_27', 'question_28', 'question_29',
-                                          'question_30', 'question_31', 'question_32')
-
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    import pandas as pd
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate the graph.", status=400)
-
-    # Step 4: Convert all question columns to numeric, replacing errors with NaN
-    question_columns = ['question_1', 'question_2', 'question_3', 'question_4', 'question_5',
-                        'question_6', 'question_7', 'question_8', 'question_9', 'question_10',
-                        'question_11', 'question_12', 'question_13', 'question_14', 'question_15',
-                        'question_16', 'question_17', 'question_18', 'question_19', 'question_20',
-                        'question_21', 'question_22', 'question_23', 'question_24', 'question_25',
-                        'question_26', 'question_27', 'question_28', 'question_29', 'question_30',
-                        'question_31', 'question_32']
-
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    df[question_columns] = df[question_columns].fillna(0)
-
-    # Step 5: Calculate the total rating per row by summing the question columns
-    df['total_rating'] = df[question_columns].sum(axis=1)
-
-    # Step 6: Group by 'dept_name' and calculate the average total rating
-    avg_ratings = df.groupby('dept_name')['total_rating'].mean().reset_index()
-
-    # Step 7: Plot the average ratings for each department as a bar chart
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(12, 8))
-    rects = plt.bar(avg_ratings['dept_name'], avg_ratings['total_rating'], color='skyblue')
-
-    # Add title and labels
-    plt.title('Department-wise Average Ratings')
-    plt.xlabel('Department')
-    plt.ylabel('Average Rating')
-
-    # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha="right")
-
-    # Enable gridlines for the y-axis
-    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
-
-    # Add numbers (height of each bar) on top of the bars
-    for rect in rects:
-        yval = rect.get_height()
-        plt.text(rect.get_x() + rect.get_width()/2, yval, round(yval, 2), va='bottom', ha='center', fontsize=10)
-
-    # Ensure the layout is adjusted properly
-    plt.tight_layout()
-
-    # Step 8: Save the plot to a BytesIO object
-    from io import BytesIO
-    import base64
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Step 9: Convert image to base64 string
-    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    return JsonResponse({'image': img_base64})
-
-#3. Distribution of Ratings
-def plot_rating_distribution(request):
-    # Step 1: Query the UploadCSV table to get the required data (all question ratings)
-    data = UploadCSV.objects.all().values('question_1', 'question_2', 'question_3', 'question_4',
-                                          'question_5', 'question_6', 'question_7', 'question_8',
-                                          'question_9', 'question_10', 'question_11', 'question_12',
-                                          'question_13', 'question_14', 'question_15', 'question_16',
-                                          'question_17', 'question_18', 'question_19', 'question_20',
-                                          'question_21', 'question_22', 'question_23', 'question_24',
-                                          'question_25', 'question_26', 'question_27', 'question_28',
-                                          'question_29', 'question_30', 'question_31', 'question_32')
-
-    # Step 2: Convert the QuerySet to a DataFrame for easier manipulation
-    import pandas as pd
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate the graph.", status=400)
-
-    # Step 4: Convert all question columns to numeric, replacing errors with NaN
-    question_columns = ['question_1', 'question_2', 'question_3', 'question_4', 'question_5',
-                        'question_6', 'question_7', 'question_8', 'question_9', 'question_10',
-                        'question_11', 'question_12', 'question_13', 'question_14', 'question_15',
-                        'question_16', 'question_17', 'question_18', 'question_19', 'question_20',
-                        'question_21', 'question_22', 'question_23', 'question_24', 'question_25',
-                        'question_26', 'question_27', 'question_28', 'question_29', 'question_30',
-                        'question_31', 'question_32']
-
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    df[question_columns] = df[question_columns].fillna(0)
-
-    # Step 5: Combine all question columns into a single series to analyze rating distribution
-    ratings_data = df[question_columns].values.flatten()  # Flatten the DataFrame to 1D array
-
-    # Step 6: Plot the distribution using a histogram
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-
-    plt.figure(figsize=(10, 6))
-    ax = sns.histplot(ratings_data, bins=30, kde=True, color='blue')  # KDE for smooth distribution curve
-    plt.title('Distribution of Ratings (Histogram)')
-    plt.xlabel('Rating')
-    plt.ylabel('Frequency')
-
-    # Step 7: Add gridlines and display counts on top of bars
-    plt.grid(True, linestyle='--', alpha=0.7)
-
-    # Add counts on top of bars
-    for patch in ax.patches:
-        height = patch.get_height()
-        if height > 0:  # Check to avoid division by zero
-            plt.text(patch.get_x() + patch.get_width() / 2, height,
-                     f'{int(height)}', ha='center', va='bottom', fontsize=10)
-
-    # Step 8: Save the plot to a BytesIO object
-    from io import BytesIO
-    import base64
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    return JsonResponse({'image': img_base64})
 
 #4. Pie Chart Comments
 nltk.download('stopwords')
 # Function to get word frequencies
-def get_word_frequencies(comments):
-    # Combine all comments into one text
-    text = ' '.join(comments)
 
-    # Clean the text
-    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
-    words = text.lower().split()  # Convert to lowercase and split into words
+### DEPARTMENT AVERAGE RATINGS
+def plot_average_ratings_ATYCB(request):
+    # Check if data is cached
+    data = cache.get('average_ratings_data')
 
-    # Remove stop words
-    stop_words = set(stopwords.words('english'))
-    filtered_words = [word for word in words if word not in stop_words]
+    if not data:
+        # Query the database for ATYCB department data
+        data = UploadCSV.objects.filter(dept_name='ATYCB').values(
+            'resp_fac', *['question_{}'.format(i) for i in range(1, 31)]
+        )
+        df = pd.DataFrame(list(data))
 
-    # Count word frequencies
-    word_counts = Counter(filtered_words)
-    return word_counts.most_common(10)  # Get the top 10 words
+        # Convert question columns to numeric and handle NaN values
+        df = df.apply(pd.to_numeric, errors='coerce').fillna(0)
 
+        # Define categories and corresponding questions
+        CATEGORIES = {
+            "Presence/Guidance": ['question_1', 'question_2', 'question_3'],
+            "Collaborative Learning": ['question_4', 'question_5', 'question_6',
+                                       'question_7', 'question_8', 'question_9'],
+            "Active Learning": ['question_10', 'question_11', 'question_12'],
+            "Content Knowledge and Proficiency": ['question_13', 'question_14', 'question_15'],
+            "Course Expectations": ['question_16', 'question_17', 'question_18'],
+            "Clarity/Instructions": ['question_19', 'question_20', 'question_21'],
+            "Feedback": ['question_22', 'question_23', 'question_24'],
+            "Inclusivity": ['question_25', 'question_26', 'question_27'],
+            "Outcome-Based Education": ['question_28', 'question_29', 'question_30']
+        }
+
+        # Calculate average ratings for each category
+        category_averages = {
+            category: df[questions].mean().mean()
+            for category, questions in CATEGORIES.items()
+            if not df[questions].isnull().all(axis=1).any()
+        }
+
+        # Store processed data in cache (15 minutes)
+        cache.set('average_ratings_data', category_averages, timeout=60 * 15)
+    else:
+        category_averages = data
+
+    # Hover text for categories
+    hover_text = {
+        "Presence/Guidance": """
+        <b>I. Presence/Guidance</b><br>
+        1. The instructor has set clear standards regarding their timeliness in responding to messages<br>
+        2. The instructor has provided the appropriate information and contact details for technical concerns<br>
+        3. The instructor showed interest in student progress
+        """,
+        "Collaborative Learning": """
+        <b>II. Collaborative Learning</b><br>
+        a. SYNCHRONOUS:<br>
+        i. Encourages participation<br>
+        ii. Implements small group discussions (breakout rooms)<br>
+        iii. Provides equal opportunities for students to share ideas<br>
+        b. ASYNCHRONOUS:<br>
+        i. Requires participation<br>
+        ii. Provides platforms for small group discussions<br>
+        iii. Tasks require collaboration
+        """,
+        # Add similar hover text for other categories...
+    }
+
+    # Prepare data for plotting
+    categories = list(category_averages.keys())
+    averages = list(category_averages.values())
+
+    # Create a Plotly bar chart
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=categories,
+                y=averages,
+                text=[f'{value:.2f}' for value in averages],  # Display values
+                hovertemplate="<b>%{x}</b><br>Score: %{y:.2f}<br>%{customdata}<extra></extra>",
+                customdata=[hover_text.get(cat, "No details available.") for cat in categories],
+                marker=dict(color='blue')
+            )
+        ]
+    )
+
+    fig.update_layout(
+        title='ATYCB Categorized Average Ratings',
+        xaxis_title='Categories',
+        yaxis_title='Average Rating',
+        hovermode='x'
+    )
+
+    # Save plot as image in BytesIO object
+    img = BytesIO()
+    fig.write_image(img, format='png', engine='kaleido')
+    img.seek(0)
+    graph_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    # Return the image through the API endpoint
+    return JsonResponse({'image': graph_base64})
+
+def plot_average_ratings_CAS(request):
+    # Query the database for ATYCB department data
+    data = UploadCSV.objects.filter(dept_name='CAS').values('resp_fac', *['question_{}'.format(i) for i in range(1, 31)])
+    df = pd.DataFrame(list(data))
+
+    # Convert question columns to numeric
+    df = df.apply(pd.to_numeric, errors='coerce')
+
+    # Define the categories and the corresponding question columns
+    CATEGORIES = {
+        "Presence/Guidance": ['question_1', 'question_2', 'question_3'],
+        "Collaborative Learning": ['question_4', 'question_5', 'question_6', 'question_7', 'question_8', 'question_9'],
+        "Active Learning": ['question_10', 'question_11', 'question_12'],
+        "Content Knowledge & Proficiency": ['question_13', 'question_14', 'question_15'],
+        "Course Expectations": ['question_16', 'question_17', 'question_18'],
+        "Clarity/Instructions": ['question_19', 'question_20', 'question_21'],
+        "Feedback": ['question_22', 'question_23', 'question_24'],
+        "Inclusivity": ['question_25', 'question_26', 'question_27'],
+        "Outcome-Based Education": ['question_28', 'question_29', 'question_30']
+    }
+
+    # Calculate average ratings for each category
+    category_averages = {}
+    for category, questions in CATEGORIES.items():
+        category_averages[category] = df[questions].mean().mean()
+
+    # Prepare data for graph plotting
+    categories = list(category_averages.keys())
+    averages = list(category_averages.values())
+
+    # Plot the bar graph
+    plt.figure(figsize=(15, 12))
+    bars = plt.bar(categories, averages, color='blue', label='Average Rating')
+
+    # Add value labels on top of each bar
+    for bar, value in zip(bars, averages):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{value:.2f}',
+                 ha='center', va='bottom', fontsize=14)
+
+    # Add grid lines and labels
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xlabel('Categories', fontsize=14)
+    plt.ylabel('Average Rating', fontsize=14)
+    plt.title('CAS Categorized Average Ratings', fontsize=20)
+    plt.xticks(rotation=25, ha='right', fontsize=12)
+    plt.legend()
+
+    # Save the plot to a BytesIO object and encode it as a base64 string
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Return image data as a base64 string
+    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    # Return JSON response
+    return JsonResponse({'image': image_base64})
+
+def plot_average_ratings_CCIS(request):
+    # Query the database for ATYCB department data
+    data = UploadCSV.objects.filter(dept_name='CCIS').values('resp_fac', *['question_{}'.format(i) for i in range(1, 31)])
+    df = pd.DataFrame(list(data))
+
+    # Convert question columns to numeric
+    df = df.apply(pd.to_numeric, errors='coerce')
+
+    # Define the categories and the corresponding question columns
+    CATEGORIES = {
+        "Presence/Guidance": ['question_1', 'question_2', 'question_3'],
+        "Collaborative Learning": ['question_4', 'question_5', 'question_6', 'question_7', 'question_8', 'question_9'],
+        "Active Learning": ['question_10', 'question_11', 'question_12'],
+        "Content Knowledge & Proficiency": ['question_13', 'question_14', 'question_15'],
+        "Course Expectations": ['question_16', 'question_17', 'question_18'],
+        "Clarity/Instructions": ['question_19', 'question_20', 'question_21'],
+        "Feedback": ['question_22', 'question_23', 'question_24'],
+        "Inclusivity": ['question_25', 'question_26', 'question_27'],
+        "Outcome-Based Education": ['question_28', 'question_29', 'question_30']
+    }
+
+    # Calculate average ratings for each category
+    category_averages = {}
+    for category, questions in CATEGORIES.items():
+        category_averages[category] = df[questions].mean().mean()
+
+    # Prepare data for graph plotting
+    categories = list(category_averages.keys())
+    averages = list(category_averages.values())
+
+    # Plot the bar graph
+    plt.figure(figsize=(15, 12))
+    bars = plt.bar(categories, averages, color='blue', label='Average Rating')
+
+    # Add value labels on top of each bar
+    for bar, value in zip(bars, averages):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{value:.2f}',
+                 ha='center', va='bottom', fontsize=14)
+
+    # Add grid lines and labels
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xlabel('Categories', fontsize=14)
+    plt.ylabel('Average Rating', fontsize=14)
+    plt.title('CCIS Categorized Average Ratings', fontsize=20)
+    plt.xticks(rotation=25, ha='right', fontsize=12)
+    plt.legend()
+
+    # Save the plot to a BytesIO object and encode it as a base64 string
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Return image data as a base64 string
+    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    # Return JSON response
+    return JsonResponse({'image': image_base64})
+
+def plot_average_ratings_CEA(request):
+    # Query the database for ATYCB department data
+    data = UploadCSV.objects.filter(dept_name='CEA').values('resp_fac', *['question_{}'.format(i) for i in range(1, 31)])
+    df = pd.DataFrame(list(data))
+
+    # Convert question columns to numeric
+    df = df.apply(pd.to_numeric, errors='coerce')
+
+    # Define the categories and the corresponding question columns
+    CATEGORIES = {
+        "Presence/Guidance": ['question_1', 'question_2', 'question_3'],
+        "Collaborative Learning": ['question_4', 'question_5', 'question_6', 'question_7', 'question_8', 'question_9'],
+        "Active Learning": ['question_10', 'question_11', 'question_12'],
+        "Content Knowledge & Proficiency": ['question_13', 'question_14', 'question_15'],
+        "Course Expectations": ['question_16', 'question_17', 'question_18'],
+        "Clarity/Instructions": ['question_19', 'question_20', 'question_21'],
+        "Feedback": ['question_22', 'question_23', 'question_24'],
+        "Inclusivity": ['question_25', 'question_26', 'question_27'],
+        "Outcome-Based Education": ['question_28', 'question_29', 'question_30']
+    }
+
+    # Calculate average ratings for each category
+    category_averages = {}
+    for category, questions in CATEGORIES.items():
+        category_averages[category] = df[questions].mean().mean()
+
+    # Prepare data for graph plotting
+    categories = list(category_averages.keys())
+    averages = list(category_averages.values())
+
+    # Plot the bar graph
+    plt.figure(figsize=(15, 12))
+    bars = plt.bar(categories, averages, color='blue', label='Average Rating')
+
+    # Add value labels on top of each bar
+    for bar, value in zip(bars, averages):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{value:.2f}',
+                 ha='center', va='bottom', fontsize=14)
+
+    # Add grid lines and labels
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xlabel('Categories', fontsize=14)
+    plt.ylabel('Average Rating', fontsize=14)
+    plt.title('CEA Categorized Average Ratings', fontsize=20)
+    plt.xticks(rotation=25, ha='right', fontsize=12)
+    plt.legend()
+
+    # Save the plot to a BytesIO object and encode it as a base64 string
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Return image data as a base64 string
+    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    # Return JSON response
+    return JsonResponse({'image': image_base64})
+
+def plot_average_ratings_CHS(request):
+    # Query the database for ATYCB department data
+    data = UploadCSV.objects.filter(dept_name='CHS').values('resp_fac', *['question_{}'.format(i) for i in range(1, 31)])
+    df = pd.DataFrame(list(data))
+
+    # Convert question columns to numeric
+    df = df.apply(pd.to_numeric, errors='coerce')
+
+    # Define the categories and the corresponding question columns
+    CATEGORIES = {
+        "Presence/Guidance": ['question_1', 'question_2', 'question_3'],
+        "Collaborative Learning": ['question_4', 'question_5', 'question_6', 'question_7', 'question_8', 'question_9'],
+        "Active Learning": ['question_10', 'question_11', 'question_12'],
+        "Content Knowledge & Proficiency": ['question_13', 'question_14', 'question_15'],
+        "Course Expectations": ['question_16', 'question_17', 'question_18'],
+        "Clarity/Instructions": ['question_19', 'question_20', 'question_21'],
+        "Feedback": ['question_22', 'question_23', 'question_24'],
+        "Inclusivity": ['question_25', 'question_26', 'question_27'],
+        "Outcome-Based Education": ['question_28', 'question_29', 'question_30']
+    }
+
+    # Calculate average ratings for each category
+    category_averages = {}
+    for category, questions in CATEGORIES.items():
+        category_averages[category] = df[questions].mean().mean()
+
+    # Prepare data for graph plotting
+    categories = list(category_averages.keys())
+    averages = list(category_averages.values())
+
+    # Plot the bar graph
+    plt.figure(figsize=(15, 12))
+    bars = plt.bar(categories, averages, color='blue', label='Average Rating')
+
+    # Add value labels on top of each bar
+    for bar, value in zip(bars, averages):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{value:.2f}',
+                 ha='center', va='bottom', fontsize=14)
+
+    # Add grid lines and labels
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xlabel('Categories', fontsize=14)
+    plt.ylabel('Average Rating', fontsize=14)
+    plt.title('CHS Categorized Average Ratings', fontsize=20)
+    plt.xticks(rotation=25, ha='right', fontsize=12)
+    plt.legend()
+
+    # Save the plot to a BytesIO object and encode it as a base64 string
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Return image data as a base64 string
+    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    # Return JSON response
+    return JsonResponse({'image': image_base64})
+
+def plot_average_ratings_NSTP(request):
+    # Query the database for ATYCB department data
+    data = UploadCSV.objects.filter(dept_name='NSTP').values('resp_fac', *['question_{}'.format(i) for i in range(1, 31)])
+    df = pd.DataFrame(list(data))
+
+    # Convert question columns to numeric
+    df = df.apply(pd.to_numeric, errors='coerce')
+
+    # Define the categories and the corresponding question columns
+    CATEGORIES = {
+        "Presence/Guidance": ['question_1', 'question_2', 'question_3'],
+        "Collaborative Learning": ['question_4', 'question_5', 'question_6', 'question_7', 'question_8', 'question_9'],
+        "Active Learning": ['question_10', 'question_11', 'question_12'],
+        "Content Knowledge & Proficiency": ['question_13', 'question_14', 'question_15'],
+        "Course Expectations": ['question_16', 'question_17', 'question_18'],
+        "Clarity/Instructions": ['question_19', 'question_20', 'question_21'],
+        "Feedback": ['question_22', 'question_23', 'question_24'],
+        "Inclusivity": ['question_25', 'question_26', 'question_27'],
+        "Outcome-Based Education": ['question_28', 'question_29', 'question_30']
+    }
+
+    # Calculate average ratings for each category
+    category_averages = {}
+    for category, questions in CATEGORIES.items():
+        category_averages[category] = df[questions].mean().mean()
+
+    # Prepare data for graph plotting
+    categories = list(category_averages.keys())
+    averages = list(category_averages.values())
+
+    # Plot the bar graph
+    plt.figure(figsize=(15, 12))
+    bars = plt.bar(categories, averages, color='blue', label='Average Rating')
+
+    # Add value labels on top of each bar
+    for bar, value in zip(bars, averages):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{value:.2f}',
+                 ha='center', va='bottom', fontsize=14)
+
+    # Add grid lines and labels
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xlabel('Categories', fontsize=14)
+    plt.ylabel('Average Rating', fontsize=14)
+    plt.title('NSTP Categorized Average Ratings', fontsize=20)
+    plt.xticks(rotation=25, ha='right', fontsize=12)
+    plt.legend()
+
+    # Save the plot to a BytesIO object and encode it as a base64 string
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Return image data as a base64 string
+    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+
+    # Return JSON response
+    return JsonResponse({'image': image_base64})
+
+### INSTRUCTOR AVERAGE RATINGS
+
+# Define categories and their associated questions
+CATEGORIES = {
+    "Presence/Guidance": [f"question_{i}" for i in range(1, 4)],
+    "Collaborative Learning": [f"question_{i}" for i in range(4, 10)],
+    "Active Learning": [f"question_{i}" for i in range(10, 13)],
+    "Content Knowledge and Proficiency": [f"question_{i}" for i in range(13, 16)],
+    "Course Expectations": [f"question_{i}" for i in range(16, 19)],
+    "Clarity/Instructions": [f"question_{i}" for i in range(19, 22)],
+    "Feedback": [f"question_{i}" for i in range(22, 25)],
+    "Inclusivity": [f"question_{i}" for i in range(25, 28)],
+    "Outcome-Based Education": [f"question_{i}" for i in range(28, 31)],
+}
+
+def plot_instructor_ratings(request, instructor_name):
+    # Query the database for the selected instructor
+    data = UploadCSV.objects.filter(resp_fac=instructor_name).values(
+        *[f"question_{i}" for i in range(1, 31)]
+    )
+    df = pd.DataFrame(data)
+
+    # Convert question columns to numeric and calculate category averages
+    df = df.apply(pd.to_numeric, errors="coerce")
+
+    category_averages = {
+        category: df[questions].mean().mean() for category, questions in CATEGORIES.items()
+    }
+
+    # Prepare data for plotting
+    categories = list(category_averages.keys())
+    averages = list(category_averages.values())
+
+    # Plot the bar graph
+    plt.figure(figsize=(15, 12))
+    bars = plt.bar(categories, averages, color="#2196f3", label="Average Rating")
+
+    # Add value labels on top of each bar
+    for bar, value in zip(bars, averages):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f"{value:.2f}",
+                 ha="center", va="bottom", fontsize=14)
+
+    # Add labels and gridlines
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.xlabel("Categories", fontsize=14)
+    plt.ylabel("Average Rating", fontsize=14)
+    plt.title(f"Categorized Ratings for {instructor_name}", fontsize=20)
+    plt.xticks(rotation=25, ha="right", fontsize=12)
+    plt.legend()
+
+    # Save plot to a BytesIO object and encode it as base64
+    img = BytesIO()
+    plt.savefig(img, format="png")
+    img.seek(0)
+    plt.close()
+
+    image_base64 = base64.b64encode(img.getvalue()).decode("utf-8")
+
+    return JsonResponse({"image": image_base64})
 # Function to plot a pie chart and convert it to base64
 def plot_pie_chart(word_counts, title):
     labels, sizes = zip(*word_counts)
@@ -483,147 +730,6 @@ def plot_length_of_comments_analysis(request):
     # Step 8: Render the template
     return JsonResponse({'image': histogram_base64})
 
-# 9. Sentiment Analysis Over Time
-def plot_sentiment_analysis_over_time(request):
-    # Calculate sentiment scores
-    df = calculate_sentiment_scores()
-
-    # Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate the sentiment analysis chart.", status=400)
-
-    # Step 4: Assuming you have a `crs_year` column to group by year
-    # Add the year to your DataFrame
-    df['crs_year'] = UploadCSV.objects.all().values_list('crs_year', flat=True)  # Adjust this line based on your model
-
-    # Step 5: Calculate average sentiment score grouped by year
-    avg_sentiment = df.groupby('crs_year').mean().reset_index()
-
-    # Step 6: Generate the line chart
-    plt.figure(figsize=(12, 6))
-    plt.plot(avg_sentiment['crs_year'], avg_sentiment['sentiment_score_question_31'], marker='o', color='blue', label='Question 31 Sentiment')
-    plt.plot(avg_sentiment['crs_year'], avg_sentiment['sentiment_score_question_32'], marker='o', color='orange', label='Question 32 Sentiment')
-    plt.title('Average Sentiment Score Over Time')
-    plt.xlabel('Year')
-    plt.ylabel('Average Sentiment Score')
-    plt.xticks(rotation=45)
-    plt.grid()
-    plt.legend()
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Convert image to base64 string
-    sentiment_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 7: Prepare the context with the chart image
-    context = {
-        'sentiment_chart': sentiment_chart_base64
-    }
-
-    # Step 8: Render the template
-    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    return JsonResponse({'image': img_base64})
-
-# 12. Comparison of Ratings and Comment Length
-def plot_comparison_of_ratings_and_comment_length(request):
-    # Step 1: Query your data
-    data = UploadCSV.objects.all().values(
-        'question_1', 'question_2', 'question_3', 'question_4',
-        'question_5', 'question_6', 'question_7', 'question_8',
-        'question_9', 'question_10', 'question_11', 'question_12',
-        'question_13', 'question_14', 'question_15', 'question_16',
-        'question_17', 'question_18', 'question_19', 'question_20',
-        'question_21', 'question_22', 'question_23', 'question_24',
-        'question_25', 'question_26', 'question_27', 'question_28',
-        'question_29', 'question_30', 'question_31', 'question_32'
-    )  # Adjust fields as necessary
-    df = pd.DataFrame(list(data))
-
-    # Step 2: Ensure the dataframe is not empty
-    if df.empty:
-        return HttpResponse("No data available to generate the comparison chart.", status=400)
-
-    # Step 3: Convert relevant columns to numeric for ratings
-    rating_columns = [f'question_{i}' for i in range(1, 31)]  # List of question columns from question_1 to question_30
-    df[rating_columns] = df[rating_columns].apply(pd.to_numeric, errors='coerce')  # Convert to numeric, coercing errors
-
-    # Optionally fill NaN values with 0
-    df[rating_columns] = df[rating_columns].fillna(0)
-
-    # Calculate the total rating for each row
-    df['total_rating'] = df[rating_columns].sum(axis=1)  # Calculate the total rating for each row
-
-    # Step 4: Calculate the length of comments (string values)
-    df['instructor_comment_length'] = df['question_31'].astype(str).str.len()  # Length of instructor comments
-    df['course_comment_length'] = df['question_32'].astype(str).str.len()  # Length of course comments
-
-    # Step 5: Create a new DataFrame for plotting
-    comparison_data = {
-        'Comment Length': [],
-        'Total Rating': [],
-        'Comment Type': []
-    }
-
-    # Add instructor comments data
-    comparison_data['Comment Length'] += df['instructor_comment_length'].tolist()
-    comparison_data['Total Rating'] += df['total_rating'].tolist()
-    comparison_data['Comment Type'] += ['Instructor'] * len(df)
-
-    # Add course comments data
-    comparison_data['Comment Length'] += df['course_comment_length'].tolist()
-    comparison_data['Total Rating'] += df['total_rating'].tolist()  # Total rating should be repeated for course comments
-    comparison_data['Comment Type'] += ['Course'] * len(df)
-
-    comparison_df = pd.DataFrame(comparison_data)
-
-    # Step 6: Create the scatter plot
-    plt.figure(figsize=(18, 10))
-
-    # Plot instructor comments
-    plt.scatter(
-        comparison_df[comparison_df['Comment Type'] == 'Instructor']['Comment Length'],
-        comparison_df[comparison_df['Comment Type'] == 'Instructor']['Total Rating'],
-        color='red', label='Instructor Comments', alpha=0.7, s=100, edgecolor='black'
-    )
-
-    # Plot course comments
-    plt.scatter(
-        comparison_df[comparison_df['Comment Type'] == 'Course']['Comment Length'],
-        comparison_df[comparison_df['Comment Type'] == 'Course']['Total Rating'],
-        color='blue', label='Course Comments', alpha=0.7, s=100, edgecolor='black'
-    )
-
-    # Step 7: Add titles and labels
-    plt.title('Comparison of Ratings and Comment Length', fontsize=16)
-    plt.xlabel('Comment Length (Words)', fontsize=14)
-    plt.ylabel('Total Rating', fontsize=14)
-
-    # Step 8: Add grid and legend
-    plt.grid(True)
-    plt.legend(title='Comment Types')
-
-    # Step 9: Save the plot to a BytesIO object
-    img = BytesIO()
-    plt.savefig(img, format='png', bbox_inches='tight')
-    img.seek(0)
-    plt.close()
-
-    # Convert image to base64 string
-    comparison_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 10: Prepare the context with the chart image
-    context = {
-        'comparison_chart': comparison_chart_base64
-    }
-
-    # Step 11: Render the template
-    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-    return JsonResponse({'image': img_base64})
 
 # 14. Instructor Leaderboard
 def plot_instructor_leaderboard(request):
@@ -685,345 +791,4 @@ def plot_instructor_leaderboard(request):
     # Return the image in JSON format
     return JsonResponse({'image': image_base64})
 
-# 11. Pareto Analysis of Courses
-def plot_pareto_analysis(request):
-    # Step 1: Query course data and ratings from the database (adjust field names accordingly)
-    data = UploadCSV.objects.all().values('crs_name', 'question_1', 'question_2', 'question_3', 'question_4')  # Modify questions as per your needs
 
-    # Step 2: Convert the QuerySet to a DataFrame
-    df = pd.DataFrame(list(data))
-
-    # Step 3: Calculate average rating for each course
-    df['avg_rating'] = df[['question_1', 'question_2', 'question_3', 'question_4']].mean(axis=1)
-
-    # Step 4: Group by course and calculate average rating per course
-    course_ratings = df.groupby('crs_name')['avg_rating'].mean().reset_index()
-
-    # Step 5: Sort courses by average rating in descending order
-    course_ratings = course_ratings.sort_values(by='avg_rating', ascending=False)
-
-    # Step 6: Keep only the top N courses
-    top_n = 10
-    course_ratings = course_ratings.head(top_n)
-
-    # Step 7: Calculate cumulative percentage contribution
-    course_ratings['cumulative_percentage'] = course_ratings['avg_rating'].cumsum() / course_ratings['avg_rating'].sum() * 100
-
-    # Step 8: Plot the Pareto chart (bar chart with cumulative line)
-    fig, ax1 = plt.subplots(figsize=(14, 12))  # Increased figure size
-
-    # Bar chart for course ratings
-    bars = ax1.bar(course_ratings['crs_name'], course_ratings['avg_rating'], color='C0', width=0.6)  # Narrower bars
-    ax1.set_xlabel('Courses')
-    ax1.set_ylabel('Average Rating', color='C0')
-    ax1.tick_params(axis='y', labelcolor='C0')
-
-    # Rotate and adjust the position of x-axis labels
-    plt.xticks(rotation=60, ha='right')
-
-    # Add counts on top of bars
-    for bar in bars:
-        height = bar.get_height()
-        ax1.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.2f}', ha='center', va='bottom', fontsize=10)
-
-    # Line chart for cumulative percentage
-    ax2 = ax1.twinx()
-    ax2.plot(course_ratings['crs_name'], course_ratings['cumulative_percentage'], color='C1', marker='o', linestyle='-', linewidth=2)
-    ax2.set_ylabel('Cumulative Percentage', color='C1')
-    ax2.tick_params(axis='y', labelcolor='C1')
-
-    # Add gridlines
-    ax1.grid(axis='y', linestyle='--', alpha=0.7)
-
-    # Pareto chart title
-    plt.title('Pareto Analysis of Courses')
-
-    # Step 9: Save the chart to a BytesIO object
-    img = BytesIO()
-    plt.tight_layout()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Step 10: Convert the image to base64 string
-    pareto_chart_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Step 11: Pass the base64 image to the template
-    return JsonResponse({'image': pareto_chart_base64})
-
-#####
-def plot_average_ratings_ATYCB(request):
-    # Query the database for ATYCB department data (adjust the filtering as necessary)
-    data = UploadCSV.objects.filter(dept_name='ATYCB').values('resp_fac', *['question_{}'.format(i) for i in range(1, 30)])
-    df = pd.DataFrame(list(data))
-
-    # Convert question columns to numeric and calculate the average ratings for the instructors
-    question_columns = ['question_{}'.format(i) for i in range(1, 30)]
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    avg_ratings = df.groupby('resp_fac')[question_columns].mean().mean(axis=1)
-
-    # Plot the average ratings with instructors on y-axis and average ratings on x-axis
-    plt.figure(figsize=(15, 20))  # Increased figure size
-
-    # Plot the horizontal bar chart
-    avg_ratings.sort_values().plot(kind='barh', color='skyblue', edgecolor='black')
-
-    # Set title and labels with larger font sizes
-    plt.title('ATYCB Faculty Average Ratings', fontsize=20)
-    plt.xlabel('Average Rating', fontsize=16)
-    plt.ylabel('Instructor', fontsize=16)
-
-    # Increase the size of the tick labels
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-
-    # Add gridlines to the x-axis
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-
-    # Display numbers at the end of each bar with a larger font size
-    for index, value in enumerate(avg_ratings):
-        plt.text(value, index, f'{value:.2f}', va='center', fontsize=12)
-
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object and encode it as a base64 string
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Return image data as a base64 string
-    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Return JSON response
-    return JsonResponse({'image': image_base64})
-
-def plot_average_ratings_CAS(request):
-    # Query the database for ATYCB department data (adjust the filtering as necessary)
-    data = UploadCSV.objects.filter(dept_name='CAS').values('resp_fac', *['question_{}'.format(i) for i in range(1, 30)])
-    df = pd.DataFrame(list(data))
-
-    # Convert question columns to numeric and calculate the average ratings for the instructors
-    question_columns = ['question_{}'.format(i) for i in range(1, 30)]
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    avg_ratings = df.groupby('resp_fac')[question_columns].mean().mean(axis=1)
-
-    # Plot the average ratings with instructors on y-axis and average ratings on x-axis
-    plt.figure(figsize=(15, 20))  # Increased figure size
-
-    # Plot the horizontal bar chart
-    avg_ratings.sort_values().plot(kind='barh', color='skyblue', edgecolor='black')
-
-    # Set title and labels with larger font sizes
-    plt.title('CAS Faculty Average Ratings', fontsize=20)
-    plt.xlabel('Average Rating', fontsize=16)
-    plt.ylabel('Instructor', fontsize=16)
-
-    # Increase the size of the tick labels
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-
-    # Add gridlines to the x-axis
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-
-    # Display numbers at the end of each bar with a larger font size
-    for index, value in enumerate(avg_ratings):
-        plt.text(value, index, f'{value:.2f}', va='center', fontsize=12)
-
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object and encode it as a base64 string
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Return image data as a base64 string
-    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Return JSON response
-    return JsonResponse({'image': image_base64})
-
-def plot_average_ratings_CCIS(request):
-    # Query the database for ATYCB department data (adjust the filtering as necessary)
-    data = UploadCSV.objects.filter(dept_name='CCIS').values('resp_fac', *['question_{}'.format(i) for i in range(1, 30)])
-    df = pd.DataFrame(list(data))
-
-    # Convert question columns to numeric and calculate the average ratings for the instructors
-    question_columns = ['question_{}'.format(i) for i in range(1, 30)]
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    avg_ratings = df.groupby('resp_fac')[question_columns].mean().mean(axis=1)
-
-    # Plot the average ratings with instructors on y-axis and average ratings on x-axis
-    plt.figure(figsize=(15, 20))  # Increased figure size
-
-    # Plot the horizontal bar chart
-    avg_ratings.sort_values().plot(kind='barh', color='skyblue', edgecolor='black')
-
-    # Set title and labels with larger font sizes
-    plt.title('CCIS Faculty Average Ratings', fontsize=20)
-    plt.xlabel('Average Rating', fontsize=16)
-    plt.ylabel('Instructor', fontsize=16)
-
-    # Increase the size of the tick labels
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-
-    # Add gridlines to the x-axis
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-
-    # Display numbers at the end of each bar with a larger font size
-    for index, value in enumerate(avg_ratings):
-        plt.text(value, index, f'{value:.2f}', va='center', fontsize=12)
-
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object and encode it as a base64 string
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Return image data as a base64 string
-    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Return JSON response
-    return JsonResponse({'image': image_base64})
-
-def plot_average_ratings_CEA(request):
-    # Query the database for ATYCB department data (adjust the filtering as necessary)
-    data = UploadCSV.objects.filter(dept_name='CEA').values('resp_fac', *['question_{}'.format(i) for i in range(1, 30)])
-    df = pd.DataFrame(list(data))
-
-    # Convert question columns to numeric and calculate the average ratings for the instructors
-    question_columns = ['question_{}'.format(i) for i in range(1, 30)]
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    avg_ratings = df.groupby('resp_fac')[question_columns].mean().mean(axis=1)
-
-    # Plot the average ratings with instructors on y-axis and average ratings on x-axis
-    plt.figure(figsize=(15, 20))  # Increased figure size
-
-    # Plot the horizontal bar chart
-    avg_ratings.sort_values().plot(kind='barh', color='skyblue', edgecolor='black')
-
-    # Set title and labels with larger font sizes
-    plt.title('CEA Faculty Average Ratings', fontsize=20)
-    plt.xlabel('Average Rating', fontsize=16)
-    plt.ylabel('Instructor', fontsize=16)
-
-    # Increase the size of the tick labels
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-
-    # Add gridlines to the x-axis
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-
-    # Display numbers at the end of each bar with a larger font size
-    for index, value in enumerate(avg_ratings):
-        plt.text(value, index, f'{value:.2f}', va='center', fontsize=12)
-
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object and encode it as a base64 string
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Return image data as a base64 string
-    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Return JSON response
-    return JsonResponse({'image': image_base64})
-
-def plot_average_ratings_CHS(request):
-    # Query the database for ATYCB department data (adjust the filtering as necessary)
-    data = UploadCSV.objects.filter(dept_name='CHS').values('resp_fac', *['question_{}'.format(i) for i in range(1, 30)])
-    df = pd.DataFrame(list(data))
-
-    # Convert question columns to numeric and calculate the average ratings for the instructors
-    question_columns = ['question_{}'.format(i) for i in range(1, 30)]
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    avg_ratings = df.groupby('resp_fac')[question_columns].mean().mean(axis=1)
-
-    # Plot the average ratings with instructors on y-axis and average ratings on x-axis
-    plt.figure(figsize=(15, 20))  # Increased figure size
-
-    # Plot the horizontal bar chart
-    avg_ratings.sort_values().plot(kind='barh', color='skyblue', edgecolor='black')
-
-    # Set title and labels with larger font sizes
-    plt.title('CHS Faculty Average Ratings', fontsize=20)
-    plt.xlabel('Average Rating', fontsize=16)
-    plt.ylabel('Instructor', fontsize=16)
-
-    # Increase the size of the tick labels
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-
-    # Add gridlines to the x-axis
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-
-    # Display numbers at the end of each bar with a larger font size
-    for index, value in enumerate(avg_ratings):
-        plt.text(value, index, f'{value:.2f}', va='center', fontsize=12)
-
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object and encode it as a base64 string
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Return image data as a base64 string
-    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Return JSON response
-    return JsonResponse({'image': image_base64})
-
-def plot_average_ratings_NSTP(request):
-    # Query the database for ATYCB department data (adjust the filtering as necessary)
-    data = UploadCSV.objects.filter(dept_name='NSTP').values('resp_fac', *['question_{}'.format(i) for i in range(1, 30)])
-    df = pd.DataFrame(list(data))
-
-    # Convert question columns to numeric and calculate the average ratings for the instructors
-    question_columns = ['question_{}'.format(i) for i in range(1, 30)]
-    df[question_columns] = df[question_columns].apply(pd.to_numeric, errors='coerce')
-    avg_ratings = df.groupby('resp_fac')[question_columns].mean().mean(axis=1)
-
-    # Plot the average ratings with instructors on y-axis and average ratings on x-axis
-    plt.figure(figsize=(15, 20))  # Increased figure size
-
-    # Plot the horizontal bar chart
-    avg_ratings.sort_values().plot(kind='barh', color='skyblue', edgecolor='black')
-
-    # Set title and labels with larger font sizes
-    plt.title('NSTP Faculty Average Ratings', fontsize=20)
-    plt.xlabel('Average Rating', fontsize=16)
-    plt.ylabel('Instructor', fontsize=16)
-
-    # Increase the size of the tick labels
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-
-    # Add gridlines to the x-axis
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-
-    # Display numbers at the end of each bar with a larger font size
-    for index, value in enumerate(avg_ratings):
-        plt.text(value, index, f'{value:.2f}', va='center', fontsize=12)
-
-    plt.tight_layout()
-
-    # Save the plot to a BytesIO object and encode it as a base64 string
-    img = BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
-
-    # Return image data as a base64 string
-    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
-
-    # Return JSON response
-    return JsonResponse({'image': image_base64})
