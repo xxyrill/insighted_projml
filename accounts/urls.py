@@ -10,6 +10,8 @@ urlpatterns = [
     path('create-account/', create_account, name='create_account'),
 
     path('upload-csv/', views.upload_csv, name='upload_csv'),
+    path('check-progress/', views.check_progress, name='check_progress'),  # Add this line
+
     path('delete_data/', views.delete_data, name='delete_data'),  # Add this line
     path('about/', about_us, name='about'),
 ]

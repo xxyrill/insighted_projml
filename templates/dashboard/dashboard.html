@@ -53,12 +53,28 @@
                                     <label for="department">Department</label>
                                     <select class="form-control" id="department" name="department">
                                         <option value=""></option>
-                                        <option value="avg_rating_ATYCB">ATYCB Average Rating</option>
-                                        <option value="avg_rating_CAS">CAS Average Rating</option>
-                                        <option value="avg_rating_CCIS">CCIS Average Rating</option>
-                                        <option value="avg_rating_CEA">CEA Average Rating</option>
-                                        <option value="avg_rating_CHS">CHS Average Rating</option>
-                                        <option value="avg_rating_NSTP">NSTP Average Rating</option>
+                                        <option value="avg_rating_ATYCB">ATYCB</option>
+                                        <option value="avg_rating_CAS">CAS</option>
+                                        <option value="avg_rating_CCIS">CCIS</option>
+                                        <option value="avg_rating_CEA">CEA</option>
+                                        <option value="avg_rating_CHS">CHS</option>
+                                        <option value="avg_rating_NSTP">NSTP</option>
+                                        <option value="compare_atycb_cas">ATYCB & CAS</option>
+                                        <option value="compare_atycb_ccis">ATYCB & CCIS</option>
+                                        <option value="compare_atycb_cea">ATYCB & CEA</option>
+                                        <option value="compare_atycb_chs">ATYCB & CHS</option>
+                                        <option value="compare_atycb_nstp">ATYCB & NSTP</option>
+                                        <option value="compare_cas_ccis">CAS & CCIS</option>
+                                        <option value="compare_cas_cea">CAS & CEA</option>
+                                        <option value="compare_cas_chs">CAS & CHS</option>
+                                        <option value="compare_cas_nstp">CAS & NSTP</option>
+                                        <option value="compare_ccis_cea">CCIS & CEA</option>
+                                        <option value="compare_ccis_chs">CCIS & CHS</option>
+                                        <option value="compare_ccis_nstp">CCIS & NSTP</option>
+                                        <option value="compare_cea_chs">CEA & CHS</option>
+                                        <option value="compare_cea_nstp">CEA & NSTP</option>
+                                        <option value="compare_chs_nstp">CHS & NSTP</option>
+
                                     </select>
                                 </div>
                                 <!-- Instructor Select -->
@@ -88,10 +104,11 @@
                                 <!-- Term Select -->
                                 <div class="form-group">
                                     <label for="term">Term</label>
-                                    <select class="form-control" id="term">
-                                        <option>All Terms</option>
-                                        <option>1st Term</option>
-                                        <option>2nd Term</option>
+                                    <select class="form-control" id="term" name="term">
+                                        <option value=""></option>
+                                        <option value="All Terms">All Terms</option>
+                                        <option value="1">1st Term</option>
+                                        <option value="2">2nd Term</option>
                                     </select>
                                 </div>
                                 <!-- Filter and Clear Filters Buttons -->
@@ -101,7 +118,9 @@
                                             style="width: 10rem">Clear Filters
                                     </button>
                                 </div>
+                               
                             </form>
+                            
 
                             <!-- Upload and View Data Buttons -->
                             <div class="mt-4 text-center">
@@ -137,22 +156,164 @@
                 </div>
             </div>
 
-            <div class="col-md-8">
-                <div class="card shadow rounded">
-                    <div class="card-body" style="height: 700px; overflow-y: auto;">
-                        <div id="graph-container" class="container-fluid">
-                            <!-- Graph content will be loaded here -->
-                        </div>
-                    </div>
+<!-- Graph container -->    
+<div class="col-md-8">
+    <div class="card shadow rounded">
+        <div class="card-body" style="height: 700px; overflow-y: auto;">
+            <!-- Feedback Button and Content -->
+            <div class="d-flex justify-content-end">
+                <!-- Button to toggle feedback visibility -->
+                <button class="btn btn-secondary" id="feedbackToggle" onclick="toggleFeedback()">Show Feedback</button>
+            </div>
+
+            <!-- Feedback content -->
+            <div id="feedbackContent" style="display: none; margin-bottom: 20px;">
+                <h5>Strengths</h5>
+                <div>
+                    <ul class="list-inline">
+                        <li class="list-inline-item">1. Active Learning</li>
+                        <li class="list-inline-item">2. Content Knowledge and Proficiency</li>
+                    </ul>
+                </div>
+                <h5>Neutral</h5>
+                <ul class="">
+                </ul>                
+                <h5>Weaknesses</h5>
+                <div>
+                    <ul class="list-inline">
+                        <li class="list-inline-item">1. Collaborative Learning</li>
+                        <li class="list-inline-item">2. Presence/Guidance</li>
+                        <li class="list-inline-item">3. Course Expectations</li>
+                        <li class="list-inline-item">4. Feedback</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="graph-container" class="container-fluid">
+                <div id="hover-table" style="display: none; position: absolute; background: white; border: 1px solid black;">
+                    <!-- Graph content will be loaded here -->
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Comment Analysis -->
+<div class="col-md-12">
+    <div class="card shadow rounded d-flex justify-content-center align-items-start">
+        <div class="card-body w-100" style="overflow-y: auto; max-height: 700px; position: relative;">
+            <div id="comment-analysis-container" class="container-fluid text-center">
+                <h5 class="card-title text-center font-weight-bold">Comment Analysis</h5>
+
+                <!-- Filter options -->
+                <div class="form-group">
+                    <label for="termFilter">Select Term:</label>
+                    <select id="termFilter" class="form-control">
+                        <option value="all">All Terms</option>
+                        <option value="term1">Term 1</option>
+                        <option value="term2">Term 2</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="commentTypeFilter">Select Comment Type:</label>
+                    <select id="commentTypeFilter" class="form-control" onchange="updateTableColumns()">
+                        <option value="both">Both</option>
+                        <option value="instructor">Instructor Comments</option>
+                        <option value="course">Course Comments</option>
+                    </select>
+                </div>
+
+                <!-- New Filter for Sorting by Character Length -->
+                <div class="form-group">
+                    <label for="sortLengthFilter">Sort by Comment Length:</label>
+                    <select id="sortLengthFilter" class="form-control">
+                        <option value="none">No Sorting</option>
+                        <option value="longest">Longest to Shortest</option>
+                        <option value="shortest">Shortest to Longest</option>
+                    </select>
+                </div>
+           
+                <div class="form-group">
+                    <label for="sentimentFilter">Filter by Sentiment:</label>
+                    <select id="sentimentFilter" class="form-control">
+                        <option value="all">All Comments</option>
+                        <option value="good">Good Comments</option>
+                        <option value="bad">Bad Comments</option>
+                    </select>
+                </div>                
+
+                <!-- View Data Button -->
+                <button id="viewDataButtonComments" class="btn btn-primary mt-3" onclick="loadCommentsData()">View Data</button>
+
+                <!-- Table to display the comments (hidden initially) -->
+                <table id="commentTable" class="table table-striped mt-4" style="display: none;">
+                    <thead>
+                        <tr id="tableHeader">
+                            <th style="position: relative; user-select: none;">Instructor Comment
+                                <div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>
+                            </th>
+                            <th style="position: relative; user-select: none;">Course Comment
+                                <div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>
+                            </th>
+                            <th style="position: relative; user-select: none;">Term
+                                <div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="commentTableBody">
+                        <!-- Content populated dynamically -->
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instructor Ranking -->
+
+<div class="col-md-12">
+    <div class="card shadow rounded d-flex justify-content-center align-items-start">
+        <div class="card-body w-100" style="overflow-y: auto; max-height: 700px; position: relative;">
+            <div id="instructor-ranking-container" class="container-fluid text-center">
+                <h5 class="card-title text-center font-weight-bold">Instructor Ranking</h5>
+
+                <!-- Filter options -->
+                <div class="form-group">
+                    <label for="termFilter">Select Term:</label>
+                    <select id="termFilter" class="form-control">
+                        <option value="all">All Terms</option>
+                        {% for term in terms %}
+                            <option value="{{ survey_name }}">{{ term }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="deptFilter">Select Department:</label>
+                    <select id="deptFilter" class="form-control">
+                        <option value="all">All Departments</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}">{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Image to display the graph -->
+                <img id="instructorRankingGraph" src="" alt="Instructor Ranking Graph" style="display: none; max-width: 100%;" />
+
+                <!-- Load graph button -->
+                <button class="btn btn-primary mt-3" id="loadGraphButton">Load Graph</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script src="{% static 'assets/js/jspdf.debug.js' %}"></script>
     <script src="{% static 'assets/js/html2canvas.min.js' %}"></script>
     <script src="{% static 'assets/js/html2pdf.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
         function myFunction() {
@@ -238,6 +399,51 @@
                 case 'avg_rating_NSTP':
                     graphUrl = '/plot_average_ratings_NSTP/';
                     break;
+                case 'compare_atycb_cas':
+                    graphUrl = '/compare/atycb-cas/';
+                    break;     
+                case 'compare_atycb_ccis':
+                    graphUrl = '/compare/atycb-ccis/';
+                    break;    
+                case 'compare_atycb_cea':
+                    graphUrl = '/compare/atycb-cea/';
+                    break; 
+                case 'compare_atycb_chs':
+                    graphUrl = '/compare/atycb-chs/';
+                    break;   
+                case 'compare_atycb_nstp':
+                    graphUrl = '/compare/atycb-nstp/';
+                    break;      
+                case 'compare_cas_ccis':
+                    graphUrl = '/compare/cas-ccis/';
+                    break;     
+                case 'compare_cas_cea':
+                    graphUrl = '/compare/cas-cea/';
+                    break; 
+                case 'compare_cas_chs':
+                    graphUrl = '/compare/cas-chs/';
+                    break;    
+                case 'compare_cas_nstp':
+                    graphUrl = '/compare/cas-nstp/';
+                    break;
+                case 'compare_ccis_cea':
+                    graphUrl = '/compare/ccis-cea/';
+                    break;   
+                case 'compare_ccis_chs':
+                    graphUrl = '/compare/ccis-chs/';
+                    break;   
+                case 'compare_ccis_nstp':
+                    graphUrl = '/compare/ccis-nstp/';
+                    break;
+                case 'compare_cea_chs':
+                    graphUrl = '/compare/cea-chs/';
+                    break;
+                case 'compare_cea_nstp':
+                    graphUrl = '/compare/cea-nstp/';
+                    break;
+                case 'compare_chs_nstp':
+                    graphUrl = '/compare/chs-nstp/';
+                    break;                                                                                                                                                      
                 default:
                     return Promise.reject('Invalid graph selection.');
             }
@@ -260,7 +466,7 @@
             document.getElementById('department').selectedIndex = 0;  // Reset graph select
             document.getElementById('instructor').selectedIndex = 0;  // Reset instructor select
             document.getElementById('course').selectedIndex = 0;  // Reset course select
-
+            document.getElementById('term').selectedIndex = 0;  // Reset term select
             // Clear the graph container
             document.getElementById('graph-container').innerHTML = '';
         });
@@ -271,7 +477,8 @@
         document.getElementById("view-data-btn").addEventListener("click", function () {
             const selectedGraph = document.getElementById("department").value;
             const instructorName = document.getElementById("instructor").value;
-
+            const selectedTerm = document.getElementById("term").value;
+            
             // Clear graph container before rendering new graphs
             document.getElementById('graph-container').innerHTML = '';
 
@@ -285,8 +492,6 @@
             } else if (instructorName) {
                 // If no department graph is selected, render only the instructor graph
                 loadInstructorGraph(instructorName);
-            } else {
-                document.getElementById('graph-container').innerHTML = '<p>Please select a graph or instructor.</p>';
             }
         });
 
@@ -320,12 +525,67 @@
             });
     }
 
-    // Define the scrollToBottom function to scroll the graph container to the bottom
-    function scrollToBottom() {
-        const container = document.getElementById('graph-container');
-        container.scrollTop = container.scrollHeight;
-    }
 </script>
+
+    <!-- term trend graph -->
+
+    <script>
+        document.getElementById("view-data-btn").addEventListener("click", function () {
+            const selectedTerm = document.getElementById("term").value; // Get the selected term
+    
+            // Clear the graph container before rendering a new graph
+            document.getElementById('graph-container').innerHTML = '';
+    
+            let url = '';
+            // Determine which URL to use based on the selected term
+            if (selectedTerm === 'Term 1') {
+                url = '/plot_term_1/';
+            } else if (selectedTerm === 'Term 2') {
+                url = '/plot_term_2/';
+            } else if (selectedTerm === 'All Terms') {
+                url = '/plot_all_terms/';
+            } else {
+                // document.getElementById('graph-container').innerText = 'Please select a valid term.';
+                return; // Exit the function if no valid term is selected
+            }
+    
+            // Fetch data for the selected term
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Assuming the server returns JSON
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error(data.error); // Handle error if no data is returned
+                        document.getElementById('graph-container').innerText = data.error;
+                        return;
+                    }
+    
+                    // Create an image element to display the graph
+                    const img = document.createElement('img');
+                    img.src = `data:image/png;base64,${data.image}`; // Set the image source to the base64 string
+    
+                    // Append the image to the graph container
+                    document.getElementById('graph-container').appendChild(img);
+    
+                    // Scroll to the bottom of the graph container
+                    scrollToBottom();
+                })
+                .catch(error => {
+                    console.error('Error fetching term trend graph:', error);
+                    document.getElementById('graph-container').innerText = 'No data available.';
+                });
+        });
+    
+        // Define the scrollToBottom function to scroll the graph container to the bottom
+        function scrollToBottom() {
+            const container = document.getElementById('graph-container');
+            container.scrollTop = container.scrollHeight; // Scroll to the bottom
+        }
+    </script>
 
 
     <!-- Function to scroll to the bottom of the graph container -->
@@ -334,5 +594,206 @@
             const container = document.getElementById("graph-container");
             container.scrollTop = container.scrollHeight;
     </script>
+
+    <!-- Show feedback javascript -->
+    <script>
+        function toggleFeedback() {
+            const feedbackContent = document.getElementById("feedbackContent");
+            const feedbackToggle = document.getElementById("feedbackToggle");
     
+            // Toggle visibility of feedback content
+            if (feedbackContent.style.display === "none") {
+                feedbackContent.style.display = "block";
+                feedbackToggle.innerText = "Hide Feedback";  // Change button text
+            } else {
+                feedbackContent.style.display = "none";
+                feedbackToggle.innerText = "Show Feedback";  // Change button text
+            }
+        }
+    </script>
+
+    <!-- comment analysis javascript -->
+    <script>
+        document.getElementById('viewDataBtn').addEventListener('click', function () {
+            updateTableColumns();
+        });
+    
+        function updateTableColumns() {
+            const commentType = document.getElementById('commentTypeFilter').value;
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('commentTableBody');
+    
+            // Clear existing rows
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+    
+            // Define columns based on selection
+            let columns = [];
+            if (commentType === 'both') {
+                columns = ['Instructor Comment', 'Course Comment', 'Term'];
+            } else if (commentType === 'instructor') {
+                columns = ['Instructor Comment', 'Term'];
+            } else if (commentType === 'course') {
+                columns = ['Course Comment', 'Term'];
+            }
+    
+            // Create new header cells
+            columns.forEach((col) => {
+                const th = document.createElement('th');
+                th.style.position = 'relative';
+                th.style.userSelect = 'none';
+                th.innerHTML = col + '<div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>';
+                tableHeader.appendChild(th);
+            });
+    
+            // Call your function to load data for the selected comment type
+            loadCommentsData();
+        }
+    
+        function loadCommentsData() {
+            const term = document.getElementById('termFilter').value; // Get the term value
+            const commentType = document.getElementById('commentTypeFilter').value; // Get the comment type value
+            const sentiment = document.getElementById('sentimentFilter').value; // Get the sentiment value
+            const sortLength = document.getElementById('sortLengthFilter').value; // Get the sorting option
+    
+            // Construct the API URL with query parameters
+            const url = `/comments_table_view/?term=${term}&comment_type=${commentType}&sentiment=${sentiment}`;
+    
+            // Fetch data from the API
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let comments = data.comments;
+    
+                    // Filter comments based on sentiment
+                    if (sentiment !== 'all') {
+                        comments = comments.filter(comment => comment.sentiment === sentiment);
+                    }
+    
+                    // Sort the comments based on the selected sorting option
+                    if (sortLength === 'longest') {
+                        comments.sort((a, b) => {
+                            const aLength = (a.question_31 || '').length + (a.question_32 || '').length;
+                            const bLength = (b.question_31 || '').length + (b.question_32 || '').length;
+                            return bLength - aLength;
+                        });
+                    } else if (sortLength === 'shortest') {
+                        comments.sort((a, b) => {
+                            const aLength = (a.question_31 || '').length + (a.question_32 || '').length;
+                            const bLength = (b.question_31 || '').length + (b.question_32 || '').length;
+                            return aLength - bLength;
+                        });
+                    }
+    
+                    // Populate the table body with the sorted comments
+                    const tbody = document.querySelector('#commentTableBody');
+                    tbody.innerHTML = ''; // Clear the existing table content
+    
+                    comments.forEach(comment => {
+                        const row = document.createElement('tr');
+    
+                        // Conditionally create cells based on the selected comment type
+                        if (commentType === 'both' || commentType === 'instructor') {
+                            const instructorCommentCell = document.createElement('td');
+                            instructorCommentCell.textContent = comment.question_31 || 'N/A';
+                            row.appendChild(instructorCommentCell);
+                        }
+    
+                        if (commentType === 'both' || commentType === 'course') {
+                            const courseCommentCell = document.createElement('td');
+                            courseCommentCell.textContent = comment.question_32 || 'N/A';
+                            row.appendChild(courseCommentCell);
+                        }
+    
+                        // Always include the term column
+                        const termCell = document.createElement('td');
+                        termCell.textContent = comment.term || 'N/A';
+                        row.appendChild(termCell);
+    
+                        tbody.appendChild(row);
+                    });
+    
+                    // Show the table if there are comments to display
+                    if (comments.length > 0) {
+                        document.getElementById('commentTable').style.display = 'table';
+                    } else {
+                        document.getElementById('commentTable').style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+    
+        // Event listener for the filters
+        document.getElementById('commentTypeFilter').addEventListener('change', updateTableColumns);
+        document.getElementById('sentimentFilter').addEventListener('change', loadCommentsData);
+        document.getElementById('termFilter').addEventListener('change', loadCommentsData);
+        document.getElementById('sortLengthFilter').addEventListener('change', loadCommentsData);
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#loadGraphButton').click(function() {
+                const deptName = $('#deptFilter').val();
+                const term = $('#termFilter').val();
+                
+                // Debugging: Log the selected filters
+                console.log("Department Selected:", deptName);
+                console.log("Term Selected:", term);
+                
+                $.get('/api/instructor-ranking-graph/', { dept_name: deptName, survey_name: term }, function(data) {
+                    console.log("API Response:", data);
+                    
+                    if (term === '23.24.1T | College Faculty Performance Evaluation' || term === '2T.23.24 | College Faculty Performance Evaluation') {
+                        // Hide the graph and show the table
+                        $('#instructorRankingGraph').hide();
+                        $('#instructorRankingTable').show().html(data.table); // Assuming data.table contains your HTML table
+                    } else {
+                        // Show the graph if all terms are selected
+                        $('#instructorRankingTable').hide();
+                        $('#instructorRankingGraph').attr('src', data.graph).show();
+                    }
+                }).fail(function() {
+                    alert('Error fetching data. Please try again.');
+                });
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#view-data-btn-CAS').on('click', function() {
+                $.ajax({
+                    url: '{% url "plot_average_ratings_CAS" %}',  // Ensure this is pointing to the correct view
+                    method: 'GET',
+                    success: function(response) {
+                        // Handle successful data retrieval (render graph, etc.)
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert(xhr.responseJSON.error);  // Display error message
+                        } else {
+                            alert('An unexpected error occurred.');
+                        }
+                    }
+                });
+            });
+        
+            $('#view-data-btn-ATYCB').on('click', function() {
+                $.ajax({
+                    url: '{% url "plot_average_ratings_ATYCB" %}',  // Ensure this is pointing to the correct view
+                    method: 'GET',
+                    success: function(response) {
+                        // Handle successful data retrieval (render graph, etc.)
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert(xhr.responseJSON.error);  // Display error message
+                        } else {
+                            alert('An unexpected error occurred.');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

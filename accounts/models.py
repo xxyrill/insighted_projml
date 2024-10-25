@@ -8,11 +8,11 @@ class CustomUser(AbstractUser):
         ('VPAA', 'Vice President of Academic Affairs'),
         ('IDEALS', 'Ideals'),
         ('QAEO', 'QAEO'),
-        ('DEANS', 'Deans'),
-        ('ATYCB', 'ATYCB DEAN'),
-        ('CAS', 'CAS DEAN'),
-        ('CEA', 'CEA DEAN'),
-        ('CCIS', 'CCIS DEAN'),
+        ('DEANS', 'Deans'),  # Single 'DEANS' type for general dean role
+        ('ATYCB', 'ATYCB Dean'),
+        ('CAS', 'CAS Dean'),
+        ('CEA', 'CEA Dean'),
+        ('CCIS', 'CCIS Dean'),
     )
 
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
@@ -22,6 +22,7 @@ class CustomUser(AbstractUser):
 
 class UploadCSV (models.Model):
     survey_name = models.CharField(max_length=255)
+    term = models.CharField(max_length=10, default='Unknown')
     date_start = models.CharField(max_length=255)
     date_close = models.CharField(max_length=255)
     crs_num = models.CharField(max_length=255)
@@ -211,6 +212,7 @@ class UploadCSV (models.Model):
 
     def __str__(self):
         return (f"Survey: {self.survey_name}, "
+                f"Term: {self.term}, "
                 f"Date_start: {self.date_start}, "
                 f"Date_close: {self.date_close}, "
                 f"Crs_num: {self.crs_num}, "
