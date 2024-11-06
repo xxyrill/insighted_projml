@@ -53,30 +53,30 @@
                                     <label for="department">Department</label>
                                     <select class="form-control" id="department" name="department">
                                         <option value=""></option>
-                                        <option value="avg_rating_ATYCB">ATYCB</option>
-                                        <option value="avg_rating_CAS">CAS</option>
-                                        <option value="avg_rating_CCIS">CCIS</option>
-                                        <option value="avg_rating_CEA">CEA</option>
-                                        <option value="avg_rating_CHS">CHS</option>
-                                        <option value="avg_rating_NSTP">NSTP</option>
-                                        <option value="compare_atycb_cas">ATYCB & CAS</option>
-                                        <option value="compare_atycb_ccis">ATYCB & CCIS</option>
-                                        <option value="compare_atycb_cea">ATYCB & CEA</option>
-                                        <option value="compare_atycb_chs">ATYCB & CHS</option>
-                                        <option value="compare_atycb_nstp">ATYCB & NSTP</option>
-                                        <option value="compare_cas_ccis">CAS & CCIS</option>
-                                        <option value="compare_cas_cea">CAS & CEA</option>
-                                        <option value="compare_cas_chs">CAS & CHS</option>
-                                        <option value="compare_cas_nstp">CAS & NSTP</option>
-                                        <option value="compare_ccis_cea">CCIS & CEA</option>
-                                        <option value="compare_ccis_chs">CCIS & CHS</option>
-                                        <option value="compare_ccis_nstp">CCIS & NSTP</option>
-                                        <option value="compare_cea_chs">CEA & CHS</option>
-                                        <option value="compare_cea_nstp">CEA & NSTP</option>
-                                        <option value="compare_chs_nstp">CHS & NSTP</option>
-
+                                        <option value="ATYCB">ATYCB</option>
+                                        <option value="CAS">CAS</option>
+                                        <option value="CCIS">CCIS</option>
+                                        <option value="CEA">CEA</option>
+                                        <option value="CHS">CHS</option>
+                                        <option value="NSTP">NSTP</option>
+                                        <option value="atycb_cas">ATYCB & CAS</option>
+                                        <option value="atycb_ccis">ATYCB & CCIS</option>
+                                        <option value="atycb_cea">ATYCB & CEA</option>
+                                        <option value="atycb_chs">ATYCB & CHS</option>
+                                        <option value="atycb_nstp">ATYCB & NSTP</option>
+                                        <option value="cas_ccis">CAS & CCIS</option>
+                                        <option value="cas_cea">CAS & CEA</option>
+                                        <option value="cas_chs">CAS & CHS</option>
+                                        <option value="cas_nstp">CAS & NSTP</option>
+                                        <option value="ccis_cea">CCIS & CEA</option>
+                                        <option value="ccis_chs">CCIS & CHS</option>
+                                        <option value="ccis_nstp">CCIS & NSTP</option>
+                                        <option value="cea_chs">CEA & CHS</option>
+                                        <option value="cea_nstp">CEA & NSTP</option>
+                                        <option value="chs_nstp">CHS & NSTP</option>
                                     </select>
                                 </div>
+
                                 <!-- Instructor Select -->
                                 <div class="form-group">
                                     <label for="instructor">Instructor</label>
@@ -89,42 +89,34 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <!-- Course Select -->
-                                <div class="form-group">
+
+                                <div class="form-group" id="course-filter-section">
                                     <label for="course">Course</label>
                                     <select class="form-control" id="course" name="course">
-                                        <option value="All Courses"></option>
-                                        {% for course in courses %}
-                                            <option value="{{ course }}">{{ course }}</option>
-                                        {% empty %}
-                                            <option value="">No courses available</option>
-                                        {% endfor %}
+                                        <option value=""></option>
                                     </select>
                                 </div>
+                          
                                 <!-- Term Select -->
                                 <div class="form-group">
-                                    <label for="term">Term</label>
+                                    <label for="term">Term Trend</label>
                                     <select class="form-control" id="term" name="term">
                                         <option value=""></option>
                                         <option value="All Terms">All Terms</option>
-                                        <option value="1">1st Term</option>
-                                        <option value="2">2nd Term</option>
+                                        <option value="Term 1">1st Term</option>
+                                        <option value="Term 2">2nd Term</option>
+                                        <option value="Term 3">3rd Term</option>
                                     </select>
                                 </div>
-                                <!-- Filter and Clear Filters Buttons -->
-                                <div class="d-flex justify-content-between">
-                                    <button type="submit" class="btn btn-primary" style="width: 10rem">Filter</button>
-                                    <button type="button" id="clear-filters-btn" class="btn btn-secondary"
-                                            style="width: 10rem">Clear Filters
-                                    </button>
-                                </div>
-                               
                             </form>
                             
 
                             <!-- Upload and View Data Buttons -->
                             <div class="mt-4 text-center">
-                                {% if user.is_authenticated %}
+                                <button type="button" id="clear-filters-btn" class="btn btn-secondary btn-block mt-2" style="margin-top: -80px;"
+                                >Clear Filters
+                        </button>
+                                {% if user.is_authenticated and user.user_type == "IDEALS" %}
                                     <button type="button"
                                             class="btn btn-primary btn-block"
                                             data-toggle="modal"
@@ -138,10 +130,13 @@
                                         class="btn btn-primary btn-block mt-2">
                                     View Data
                                 </button>
-                                <button href="javascript:void(0)" class="btn-download btn btn-primary btn-block mt-2">
-                                    Download PDF
-                                </button>
-                                {% if user.is_authenticated %}
+                                <button type="button" 
+                                id="download-general-pdf-btn"
+                                class="btn btn-primary btn-block mt-2"
+                                onclick="downloadGeneralGraphAsPDF()">
+                            Download as PDF
+                        </button>
+                                {% if user.is_authenticated and user.user_type == "IDEALS" %}
                                     <button type="button"
                                             id="delete-data-btn"
                                             class="btn btn-danger btn-block mt-2"
@@ -160,38 +155,96 @@
 <div class="col-md-8">
     <div class="card shadow rounded">
         <div class="card-body" style="height: 700px; overflow-y: auto;">
-            <!-- Feedback Button and Content -->
-            <div class="d-flex justify-content-end">
-                <!-- Button to toggle feedback visibility -->
-                <button class="btn btn-secondary" id="feedbackToggle" onclick="toggleFeedback()">Show Feedback</button>
+            <!-- Toggle button and summary section -->
+            <div id="summary-toggle-container" style="margin-bottom: 15px;">
+                <button id="toggle-summary-btn" class="btn btn-secondary" onclick="toggleSummary()">Hide Feedback</button>
+            </div>
+            <div id="graph-summary"></div> <!-- This is the section to display strengths and weaknesses -->
+
+            <!-- Department Graph Header -->
+            <div id="department-graph-header" style="text-align: center; margin-top: 10px; display: none;">
+                <h5 id="selected-department-name"></h5>
             </div>
 
-            <!-- Feedback content -->
-            <div id="feedbackContent" style="display: none; margin-bottom: 20px;">
-                <h5>Strengths</h5>
-                <div>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">1. Active Learning</li>
-                        <li class="list-inline-item">2. Content Knowledge and Proficiency</li>
-                    </ul>
-                </div>
-                <h5>Neutral</h5>
-                <ul class="">
-                </ul>                
-                <h5>Weaknesses</h5>
-                <div>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">1. Collaborative Learning</li>
-                        <li class="list-inline-item">2. Presence/Guidance</li>
-                        <li class="list-inline-item">3. Course Expectations</li>
-                        <li class="list-inline-item">4. Feedback</li>
-                    </ul>
+            <!-- Container for the department graph -->
+            <div id="average-rating-graph-container">
+                <canvas id="averageRatingsChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Placeholder for the graph image -->
+            <div id="graph-container"></div>
+            
+            <!-- Canvas for instructor chart -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <button id="toggle-graph-btn" class="btn btn-secondary" style="margin-right: auto;">Hide Instructor Graph</button>
+            </div>
+            <h5 id="instructor-name" style="text-align: center; margin-top: 20px;"></h5>
+            <div id="instructor-graph-container">
+                <canvas id="instructorRatingsChart" width="400" height="200"></canvas>
+            </div>
+
+<!-- Course Graph Section -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <button id="toggle-course-graph-btn" class="btn btn-secondary" style="margin-right: auto;">Show Course Graph</button>
+</div>
+<!-- Course Graph Header and Container -->
+<div id="course-graph-container" class="container-fluid" style="margin-top: 20px; display: none;">
+    <h6 id="selected-course-name" style="text-align: center; margin-top: 10px;"></h6> <!-- Move the course name here -->
+    <canvas id="courseAverageRatingsChart" width="400" height="200"></canvas>
+</div>
+
+            <!-- Term Trend Graph Section -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <button id="toggle-term-graph-btn" class="btn btn-secondary" style="margin-right: auto;">Hide Term Trend Graph</button>
+            </div>
+            <div id="term-graph-container">
+                <div id="term-trend-graph" class="container-fluid">
+                    <!-- This div will hold the term trend graph image -->
                 </div>
             </div>
+               
+            <!-- Graph container -->
             <div id="graph-container" class="container-fluid">
                 <div id="hover-table" style="display: none; position: absolute; background: white; border: 1px solid black;">
-                    <!-- Graph content will be loaded here -->
+                    <!-- Additional hover-table content if needed -->
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instructor Ranking -->
+<div class="col-md-12">
+    <div class="card shadow rounded d-flex justify-content-center align-items-start">
+        <div class="card-body w-100" style="overflow-y: auto; max-height: 700px; position: relative;">
+            <div id="instructor-ranking-container" class="container-fluid text-center">
+                <h5 class="card-title text-center font-weight-bold">Instructor Leaderboard</h5>
+
+                <!-- Filter options -->
+                <select id="termFilter2" class="form-control">
+                    <option value="all">All Terms</option>
+                    <option value="Term 1">Term 1</option>
+                    <option value="Term 2">Term 2</option>
+                    <option value="Term 3">Term 3</option>
+                </select>
+
+                <div class="form-group">
+                    <label for="deptFilter">Select Department:</label>
+                    <select id="deptFilter" class="form-control">
+                        <option value="all">All Departments</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}">{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Load graph and clear fileter button -->
+                <button id="loadGraphButton" class="btn btn-primary mt-3">View Data</button>
+                <button id="clearFiltersButton" class="btn btn-secondary mt-3">Clear Filters</button>
+                <button id="download-pdf-btn" class="btn btn-primary mt-3" onclick="downloadInstructorGraphAsPDF()">Download as PDF</button>
+            
+      <!-- Image to display the graph -->
+      <img id="instructorRankingGraph" src="" alt="Instructor Ranking Graph" style="display: none; max-width: 100%; margin-top: 50px;" />            
             </div>
         </div>
     </div>
@@ -207,23 +260,40 @@
                 <!-- Filter options -->
                 <div class="form-group">
                     <label for="termFilter">Select Term:</label>
-                    <select id="termFilter" class="form-control">
-                        <option value="all">All Terms</option>
-                        <option value="term1">Term 1</option>
-                        <option value="term2">Term 2</option>
+                    <select id="termFilter" class="form-control" onchange="fetchInstructorsByTerm()">
+                        <option value="All Terms">All Terms</option>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="commentTypeFilter">Select Comment Type:</label>
-                    <select id="commentTypeFilter" class="form-control" onchange="updateTableColumns()">
+                    <select id="commentTypeFilter" class="form-control" onchange="updateTableColumns(); toggleInstructorCourseFilters()">
                         <option value="both">Both</option>
                         <option value="instructor">Instructor Comments</option>
                         <option value="course">Course Comments</option>
                     </select>
                 </div>
 
-                <!-- New Filter for Sorting by Character Length -->
+                <!-- Instructor Filter -->
+                <div class="form-group">
+                    <label for="instructorFilter">Select Instructor:</label>
+                    <select id="instructorFilter" class="form-control" onchange="fetchCoursesByInstructor()">
+                        <option value="">All Instructors</option>
+                    </select>
+                </div>
+
+                <!-- Course Filter -->
+                <div class="form-group">
+                    <label for="courseFilter">Select Course:</label>
+                    <select id="courseFilter" class="form-control">
+                        <option value="">All Courses</option>
+                    </select>
+                </div>
+
+                <!-- Other filters and buttons -->
                 <div class="form-group">
                     <label for="sortLengthFilter">Sort by Comment Length:</label>
                     <select id="sortLengthFilter" class="form-control">
@@ -232,78 +302,34 @@
                         <option value="shortest">Shortest to Longest</option>
                     </select>
                 </div>
-           
+
                 <div class="form-group">
                     <label for="sentimentFilter">Filter by Sentiment:</label>
                     <select id="sentimentFilter" class="form-control">
                         <option value="all">All Comments</option>
                         <option value="good">Good Comments</option>
                         <option value="bad">Bad Comments</option>
+                        <option value="neutral">Neutral Comments</option>
                     </select>
-                </div>                
+                </div>
 
-                <!-- View Data Button -->
                 <button id="viewDataButtonComments" class="btn btn-primary mt-3" onclick="loadCommentsData()">View Data</button>
+                <button id="clearFilterButton" class="btn btn-secondary mt-3" onclick="clearFilters()">Clear Filters</button>
+                <button id="downloadCommentsExcelBtn" class="btn btn-primary mt-3">Download as Excel</button>
 
-                <!-- Table to display the comments (hidden initially) -->
                 <table id="commentTable" class="table table-striped mt-4" style="display: none;">
                     <thead>
                         <tr id="tableHeader">
-                            <th style="position: relative; user-select: none;">Instructor Comment
-                                <div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>
-                            </th>
-                            <th style="position: relative; user-select: none;">Course Comment
-                                <div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>
-                            </th>
-                            <th style="position: relative; user-select: none;">Term
-                                <div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>
-                            </th>
+                            <th>Instructor Comment</th>
+                            <th>Course Comment</th>
+                            <th>Term</th>
+                            <th>Sentiment</th>
                         </tr>
                     </thead>
                     <tbody id="commentTableBody">
                         <!-- Content populated dynamically -->
                     </tbody>
                 </table>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Instructor Ranking -->
-
-<div class="col-md-12">
-    <div class="card shadow rounded d-flex justify-content-center align-items-start">
-        <div class="card-body w-100" style="overflow-y: auto; max-height: 700px; position: relative;">
-            <div id="instructor-ranking-container" class="container-fluid text-center">
-                <h5 class="card-title text-center font-weight-bold">Instructor Ranking</h5>
-
-                <!-- Filter options -->
-                <div class="form-group">
-                    <label for="termFilter">Select Term:</label>
-                    <select id="termFilter" class="form-control">
-                        <option value="all">All Terms</option>
-                        {% for term in terms %}
-                            <option value="{{ survey_name }}">{{ term }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="deptFilter">Select Department:</label>
-                    <select id="deptFilter" class="form-control">
-                        <option value="all">All Departments</option>
-                        {% for dept in departments %}
-                        <option value="{{ dept }}">{{ dept }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Image to display the graph -->
-                <img id="instructorRankingGraph" src="" alt="Instructor Ranking Graph" style="display: none; max-width: 100%;" />
-
-                <!-- Load graph button -->
-                <button class="btn btn-primary mt-3" id="loadGraphButton">Load Graph</button>
             </div>
         </div>
     </div>
@@ -313,140 +339,193 @@
     <script src="{% static 'assets/js/html2canvas.min.js' %}"></script>
     <script src="{% static 'assets/js/html2pdf.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery.min.js' %}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script>
-        function myFunction() {
-            var x = document.getElementById("graph").value;
-            // document.getElementById("demo").innerHTML = x;
-            console.clear();
-            console.log(x);
-            
-            var opt = '';
-            switch (x) {
-                case 'avg_rating_ATYCB':
-                    opt = 'avg_rating_ATYCB.pdf';
-                    break;
-                case 'avg_rating_CAS':
-                    opt = 'avg_rating_CAS.pdf';
-                    break;
-                case 'avg_rating_CCIS':
-                    opt = 'avg_rating_CCIS.pdf';
-                    break;
-                case 'avg_rating_CEA':
-                    opt = 'avg_rating_CEA.pdf';
-                    break;
-                case 'avg_rating_CHS':
-                    opt = 'avg_rating_CHS.pdf';
-                    break;
-                case 'avg_rating_NSTP':
-                    opt = 'avg_rating_NSTP.pdf';
-                    break;
-                default:
-                    opt = 'id.pdf';
-            }
-            options = {
-                margin: 0.1,
-                filename: opt,
-                image: {
-                    type: 'jpeg',
-                    quality: 1000
-                },
-                html2canvas: {
-                    scale: 5
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: 'letter',
-                    orientation: 'portrait'
+    <!-- CHART SCRIPT GLOBAL -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- PDF SCRIPT GLOBAL -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- EXCEL SCRIPT GLOBAL -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<!-- General PDF Script -->
+<!-- General PDF Script -->
+<script>
+    async function downloadGeneralGraphAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait', // Portrait mode
+            unit: 'px',
+            format: 'a4'
+        });
+
+        // Ensure high-quality canvas rendering by setting a higher scale
+        const captureOptions = {
+            scale: 2 // Increase scale for better resolution
+        };
+
+        // Get the selected department filter value
+        const departmentFilterElement = document.getElementById('department');
+        const selectedDepartment = departmentFilterElement ? 
+            departmentFilterElement.options[departmentFilterElement.selectedIndex].text : 'N/A';
+
+        // Group related sections to ensure they are captured on the same page
+        const groupedSections = [
+            [
+                { element: document.getElementById('graph-summary') },
+                { element: document.getElementById('average-rating-graph-container') }
+            ],
+            [
+                { element: document.getElementById('instructor-name') },
+                { element: document.getElementById('instructor-graph-container') }
+            ],
+            [
+                { element: document.getElementById('course-graph-container') }
+            ],
+            [
+                { element: document.getElementById('term-graph-container') }
+            ]
+        ];
+
+        let yOffset = 10; // Initial Y offset for the first section on the PDF
+
+        for (const sectionGroup of groupedSections) {
+            for (const section of sectionGroup) {
+                if (section.element && section.element.offsetParent !== null) { // Ensure the section is visible
+                    try {
+                        // Add the department filter as a label before the department graph
+                        if (section.element.id === 'average-rating-graph-container' && selectedDepartment !== 'N/A') {
+                            pdf.setFontSize(16);
+                            pdf.text(`Department: ${selectedDepartment}`, 10, yOffset);
+                            yOffset += 20; // Add space below the label
+                        }
+
+                        const canvas = await html2canvas(section.element, captureOptions);
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = pdf.internal.pageSize.getWidth() - 20; // Margin of 20px
+                        const aspectRatio = canvas.width / canvas.height;
+                        const imgHeight = imgWidth / aspectRatio;
+
+                        pdf.addImage(imgData, 'PNG', 10, yOffset, imgWidth, imgHeight, '', 'FAST');
+                        yOffset += imgHeight + 10; // Space between sections
+                    } catch (err) {
+                        console.error('Error capturing section:', section.element, err);
+                        alert('An error occurred while capturing the content. Please try again.');
+                    }
                 }
             }
 
-            $('.btn-download').click(function (e) {
-                e.stopImmediatePropagation();
-                element = document.getElementById('graph-container');
-                html2pdf().from(element).set(options).save();
-                document.getElementById("demo").innerHTML = "";
-                // setInterval(function () {
-                //    window.location.reload();
-                // }, 500);
-            });
+            // Add a new page after each group, except the last one
+            if (groupedSections.indexOf(sectionGroup) < groupedSections.length - 1) {
+                pdf.addPage();
+                yOffset = 10; // Reset Y offset for the new page
+            }
         }
-    </script>
+
+        pdf.save('graphs_with_summary.pdf');
+    }
+</script>
     
-    <!-- jscript for the department average rating graph -->
+    <!-- department average rating script -->
     <script>
         function renderDepartmentGraph(selectedGraph) {
             let graphUrl = '';
-
-            // Define the URL based on selected graph
+            let departmentName = '';
+    
+            // Define the URL and department name based on the selected graph
             switch (selectedGraph) {
                 case 'avg_rating_ATYCB':
                     graphUrl = '/plot_average_ratings_ATYCB/';
+                    departmentName = 'ATYCB';
                     break;
                 case 'avg_rating_CAS':
                     graphUrl = '/plot_average_ratings_CAS/';
+                    departmentName = 'CAS';
                     break;
                 case 'avg_rating_CCIS':
                     graphUrl = '/plot_average_ratings_CCIS/';
+                    departmentName = 'CCIS';
                     break;
                 case 'avg_rating_CEA':
                     graphUrl = '/plot_average_ratings_CEA/';
+                    departmentName = 'CEA';
                     break;
                 case 'avg_rating_CHS':
                     graphUrl = '/plot_average_ratings_CHS/';
+                    departmentName = 'CHS';
                     break;
                 case 'avg_rating_NSTP':
                     graphUrl = '/plot_average_ratings_NSTP/';
+                    departmentName = 'NSTP';
                     break;
                 case 'compare_atycb_cas':
                     graphUrl = '/compare/atycb-cas/';
-                    break;     
+                    departmentName = 'ATYCB vs CAS';
+                    break;
                 case 'compare_atycb_ccis':
                     graphUrl = '/compare/atycb-ccis/';
-                    break;    
+                    departmentName = 'ATYCB vs CCIS';
+                    break;
                 case 'compare_atycb_cea':
                     graphUrl = '/compare/atycb-cea/';
-                    break; 
+                    departmentName = 'ATYCB vs CEA';
+                    break;
                 case 'compare_atycb_chs':
                     graphUrl = '/compare/atycb-chs/';
-                    break;   
+                    departmentName = 'ATYCB vs CHS';
+                    break;
                 case 'compare_atycb_nstp':
                     graphUrl = '/compare/atycb-nstp/';
-                    break;      
+                    departmentName = 'ATYCB vs NSTP';
+                    break;
                 case 'compare_cas_ccis':
                     graphUrl = '/compare/cas-ccis/';
-                    break;     
+                    departmentName = 'CAS vs CCIS';
+                    break;
                 case 'compare_cas_cea':
                     graphUrl = '/compare/cas-cea/';
-                    break; 
+                    departmentName = 'CAS vs CEA';
+                    break;
                 case 'compare_cas_chs':
                     graphUrl = '/compare/cas-chs/';
-                    break;    
+                    departmentName = 'CAS vs CHS';
+                    break;
                 case 'compare_cas_nstp':
                     graphUrl = '/compare/cas-nstp/';
+                    departmentName = 'CAS vs NSTP';
                     break;
                 case 'compare_ccis_cea':
                     graphUrl = '/compare/ccis-cea/';
-                    break;   
+                    departmentName = 'CCIS vs CEA';
+                    break;
                 case 'compare_ccis_chs':
                     graphUrl = '/compare/ccis-chs/';
-                    break;   
+                    departmentName = 'CCIS vs CHS';
+                    break;
                 case 'compare_ccis_nstp':
                     graphUrl = '/compare/ccis-nstp/';
+                    departmentName = 'CCIS vs NSTP';
                     break;
                 case 'compare_cea_chs':
                     graphUrl = '/compare/cea-chs/';
+                    departmentName = 'CEA vs CHS';
                     break;
                 case 'compare_cea_nstp':
                     graphUrl = '/compare/cea-nstp/';
+                    departmentName = 'CEA vs NSTP';
                     break;
                 case 'compare_chs_nstp':
                     graphUrl = '/compare/chs-nstp/';
-                    break;                                                                                                                                                      
+                    departmentName = 'CHS vs NSTP';
+                    break;
                 default:
                     return Promise.reject('Invalid graph selection.');
             }
+
+    
             return fetch(graphUrl)
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to load department graph.');
@@ -460,44 +539,135 @@
         }
     </script>
 
-    <!-- Event listener for clearing filters -->
-    <script>
-        document.getElementById('clear-filters-btn').addEventListener('click', function () {
-            document.getElementById('department').selectedIndex = 0;  // Reset graph select
-            document.getElementById('instructor').selectedIndex = 0;  // Reset instructor select
-            document.getElementById('course').selectedIndex = 0;  // Reset course select
-            document.getElementById('term').selectedIndex = 0;  // Reset term select
-            // Clear the graph container
-            document.getElementById('graph-container').innerHTML = '';
-        });
-    </script>
-
-    <!-- Event listener for "View Data" button -->
+    <!-- view data button script -->
     <script>
         document.getElementById("view-data-btn").addEventListener("click", function () {
             const selectedGraph = document.getElementById("department").value;
             const instructorName = document.getElementById("instructor").value;
+            const selectedCourse = document.getElementById("course").value.trim();
             const selectedTerm = document.getElementById("term").value;
             
+    
             // Clear graph container before rendering new graphs
             document.getElementById('graph-container').innerHTML = '';
-
+            document.getElementById('course-graph-container').style.display = 'none'; // Hide the course graph container initially
+    
+            const promises = [];
+    
             if (selectedGraph) {
-                renderDepartmentGraph(selectedGraph).then(() => {
-                    // If instructor is selected, render the instructor graph after department graph
-                    if (instructorName) {
-                        loadInstructorGraph(instructorName);
-                    }
-                }).catch(error => console.error('Department graph error:', error));
-            } else if (instructorName) {
-                // If no department graph is selected, render only the instructor graph
-                loadInstructorGraph(instructorName);
+                promises.push(
+                    renderDepartmentGraph(selectedGraph).catch(error => console.error('Department graph error:', error))
+                );
             }
+    
+            if (instructorName) {
+                promises.push(
+                    Promise.resolve().then(() => loadInstructorGraph(instructorName)).catch(error => console.error('Instructor graph error:', error))
+                );
+            }
+    
+            if (selectedCourse) {
+                promises.push(
+                    Promise.resolve().then(() => {
+                        return fetch(`/plot-average-ratings-by-course/?course=${encodeURIComponent(selectedCourse)}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Failed to fetch course data');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Fetched Course Data:', data); // Debugging: Log fetched course data
+                                if (data.error) {
+                                    console.error('Backend error:', data.error);
+                                    document.getElementById('course-graph-container').innerText = data.error;
+                                    return;
+                                }
+    
+                                // Extract the categories and their average scores
+                                const categories = Object.keys(data.breakdown);
+                                const averageScores = categories.map(category => parseFloat(data.breakdown[category].Average));
+    
+                                // Destroy the existing chart instance if it exists
+                                if (window.courseChart) {
+                                    window.courseChart.destroy();
+                                }
+    
+                                // Ensure the canvas element exists before using it
+                                const ctx = document.getElementById('courseAverageRatingsChart');
+                                if (!ctx) {
+                                    console.error("Canvas element not found!");
+                                    return;
+                                }
+    
+                                // Get the context for the canvas
+                                const context = ctx.getContext('2d');
+                                if (!context) {
+                                    console.error("Unable to get context for canvas element!");
+                                    return;
+                                }
+    
+                                // Create the chart
+                                window.courseChart = new Chart(context, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: categories,
+                                        datasets: [{
+                                            label: 'Average Ratings',
+                                            data: averageScores,
+                                            backgroundColor: categories.map(category => data.breakdown[category].Color),
+                                            borderColor: categories.map(category => data.breakdown[category].Color),
+                                            borderWidth: 1
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true
+                                            }
+                                        },
+                                        plugins: {
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: function (context) {
+                                                        const category = context.label;
+                                                        const details = data.breakdown[category].Details;
+                                                        let tooltipText = `Average Score: ${context.raw}\n\nQuestions:\n`;
+    
+                                                        for (let question in details) {
+                                                            tooltipText += `${question}: ${details[question].Score}\n`;
+                                                        }
+    
+                                                        return tooltipText;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+    
+                                // Show the course graph container after successfully creating the chart
+                                document.getElementById('course-graph-container').style.display = 'block';
+                            })
+                            .catch(error => {
+                                console.error('Error fetching course average ratings:', error);
+                                document.getElementById('course-graph-container').innerText = 'No data available.';
+                            });
+                    })
+                );
+            }
+    
+            // Execute all the promises (for department, instructor, and course) and handle any errors
+            Promise.all(promises).then(() => {
+                console.log('All graphs rendered successfully');
+            }).catch(error => {
+                console.error('Error rendering graphs:', error);
+            });
         });
-
     </script>
     
-    <!-- jscript for the instructor average rating graph -->
+    <!-- instructor leaderboard script -->
 <script>
     function loadInstructorGraph(instructorName) {
         fetch(`/plot_instructor_ratings/${instructorName}/`)
@@ -511,8 +681,6 @@
 
                 newGraphDiv.innerHTML = `
                     
-                    <img src="data:image/png;base64,${data.image}"
-                         alt="${instructorName} Ratings Graph" class="img-fluid" />
                 `;
 
                 document.getElementById('graph-container').appendChild(newGraphDiv);
@@ -527,14 +695,198 @@
 
 </script>
 
-    <!-- term trend graph -->
+<!-- course dropdown per instructor script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const instructorSelect = document.getElementById('instructor');
+        const courseFilterSection = document.getElementById('course-filter-section');
+        const courseSelect = document.getElementById('course');
 
+        // Event listener for the change of the instructor selection
+        instructorSelect.addEventListener('change', function() {
+            const selectedInstructor = this.value;
+            if (selectedInstructor) {
+                // Show the course filter section when an instructor is selected
+                courseFilterSection.style.display = 'block';
+
+                // Fetch the courses for the selected instructor
+                fetch(`/get-courses-for-instructor/?instructor=${encodeURIComponent(selectedInstructor)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Fetched Courses:', data); // Debugging: Log the fetched courses
+
+                        // Clear existing course options
+                        courseSelect.innerHTML = '<option value="">Select a course</option>';
+
+                        // Add the courses to the dropdown
+                        if (data.courses && data.courses.length > 0) {
+                            data.courses.forEach(course => {
+                                const option = document.createElement('option');
+                                option.value = course;
+                                option.textContent = course;
+                                courseSelect.appendChild(option);
+                            });
+                        } else {
+                            // Display message if no courses are returned
+                            const noCourseOption = document.createElement('option');
+                            noCourseOption.value = "";
+                            noCourseOption.textContent = "No courses available";
+                            courseSelect.appendChild(noCourseOption);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching courses:', error);
+                    });
+            } else {
+                // Hide the course filter section if no instructor is selected
+                courseFilterSection.style.display = 'none';
+                // Clear the course dropdown
+                courseSelect.innerHTML = '<option value=""></option>';
+            }
+        });
+    });
+</script>
+
+        <!-- course graph script -->
+        <script>
+            // Function to determine color based on rating value
+            function getColor(value) {
+                if (value < 1) {
+                    return 'red';
+                } else if (value < 2.49) {
+                    return 'orange';
+                } else if (value < 3.99) {
+                    return 'yellow';
+                } else {
+                    return 'green';
+                }
+            }
+        
+            document.getElementById("view-data-btn").addEventListener("click", function () {
+                // Get filter values from the dropdowns
+                const selectedCourse = document.getElementById("course").value.trim();
+        
+                // Clear graph container before rendering new graphs
+                document.getElementById('graph-container').innerHTML = '';
+                document.getElementById('course-graph-container').style.display = 'none'; // Hide the course graph container initially
+                document.getElementById('selected-course-name').textContent = ''; // Clear course name header
+        
+                // Render Course Graph if selectedCourse is not empty
+                if (selectedCourse) {
+                    console.log(`Fetching data for course: ${selectedCourse}`);  // Debugging
+        
+                    fetch(`/plot-average-ratings-by-course/?course=${encodeURIComponent(selectedCourse)}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to fetch course data');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Fetched Course Data:', data); // Debugging
+        
+                            if (data.error) {
+                                console.error('Backend error:', data.error);
+                                document.getElementById('course-graph-container').innerText = data.error;
+                                return;
+                            }
+        
+                            // Set the course name header with overall score
+                            const categories = Object.keys(data.breakdown);
+                            let validAverages = categories.map(category => parseFloat(data.breakdown[category].Average)).filter(avg => !isNaN(avg));
+                            const overallScore = (validAverages.reduce((sum, avg) => sum + avg, 0) / validAverages.length).toFixed(2);
+        
+                            document.getElementById('selected-course-name').textContent = `Course: ${selectedCourse} | Overall Score: ${overallScore}`;
+        
+                            // Extract the categories and their average scores
+                            const averageScores = categories.map(category => parseFloat(data.breakdown[category].Average));
+                            const barColors = averageScores.map(score => getColor(score)); // Use the color function
+        
+                            // Destroy the existing chart instance if it exists
+                            if (window.courseChart) {
+                                window.courseChart.destroy();
+                            }
+        
+                            // Ensure the canvas element exists before using it
+                            const ctx = document.getElementById('courseAverageRatingsChart').getContext('2d');
+        
+                            // Create the chart
+                            window.courseChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: categories,
+                                    datasets: [{
+                                        label: 'Average Ratings',
+                                        data: averageScores,
+                                        backgroundColor: barColors, // Apply dynamic colors based on value
+                                        borderColor: barColors,
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    },
+                                    plugins: {
+                                        legend: {
+                                            display: false // Disable the legend
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function (context) {
+                                                    const category = context.label;
+                                                    const details = data.breakdown[category].Details;
+                                                    let tooltipLines = [`Category: ${category}`, `Average Score: ${context.raw}`, '', 'Questions:'];
+        
+                                                    // Add each question and its score as a new line in the tooltip
+                                                    for (let question in details) {
+                                                        tooltipLines.push(`${question}: ${details[question].Score}`);
+                                                    }
+        
+                                                    return tooltipLines;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+        
+                            // Show the course graph container after successfully creating the chart
+                            document.getElementById('course-graph-container').style.display = 'block';
+                            document.getElementById('toggle-course-graph-btn').textContent = 'Hide Course Graph'; // Update button text
+                        })
+                        .catch(error => {
+                            console.error('Error fetching course average ratings:', error);
+                            document.getElementById('course-graph-container').innerText = 'No data available.';
+                        });
+                }
+            });
+        
+            // Toggle visibility of the course graph container
+            document.getElementById('toggle-course-graph-btn').addEventListener('click', function () {
+                const courseGraphContainer = document.getElementById('course-graph-container');
+                if (courseGraphContainer.style.display === 'none' || courseGraphContainer.style.display === '') {
+                    courseGraphContainer.style.display = 'block';
+                    this.textContent = 'Hide Course Graph';
+                } else {
+                    courseGraphContainer.style.display = 'none';
+                    this.textContent = 'Show Course Graph';
+                }
+            });
+        </script>
+        
+
+    <!-- term trend script -->
     <script>
+        // Event listener for the "View Data" button
         document.getElementById("view-data-btn").addEventListener("click", function () {
             const selectedTerm = document.getElementById("term").value; // Get the selected term
     
-            // Clear the graph container before rendering a new graph
-            document.getElementById('graph-container').innerHTML = '';
+            // Clear the term trend graph container before rendering a new graph
+            document.getElementById('term-trend-graph').innerHTML = '';
     
             let url = '';
             // Determine which URL to use based on the selected term
@@ -542,60 +894,82 @@
                 url = '/plot_term_1/';
             } else if (selectedTerm === 'Term 2') {
                 url = '/plot_term_2/';
+            } else if (selectedTerm === 'Term 3') {
+                url = '/plot_term_3/';
             } else if (selectedTerm === 'All Terms') {
                 url = '/plot_all_terms/';
-            } else {
-                // document.getElementById('graph-container').innerText = 'Please select a valid term.';
-                return; // Exit the function if no valid term is selected
-            }
+            } 
     
             // Fetch data for the selected term
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json(); // Assuming the server returns JSON
-                })
-                .then(data => {
-                    if (data.error) {
-                        console.error(data.error); // Handle error if no data is returned
-                        document.getElementById('graph-container').innerText = data.error;
-                        return;
-                    }
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Assuming the server returns JSON
+            })
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error); // Handle error if no data is returned
+                    document.getElementById('term-trend-graph').innerText = data.error;
+                    return;
+                }
     
-                    // Create an image element to display the graph
-                    const img = document.createElement('img');
-                    img.src = `data:image/png;base64,${data.image}`; // Set the image source to the base64 string
+                // Create an image element to display the graph
+                const img = document.createElement('img');
+                img.src = `data:image/png;base64,${data.image}`; // Set the image source to the base64 string
     
-                    // Append the image to the graph container
-                    document.getElementById('graph-container').appendChild(img);
+                // Set a maximum width to avoid the graph appearing too large
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
     
-                    // Scroll to the bottom of the graph container
-                    scrollToBottom();
-                })
-                .catch(error => {
-                    console.error('Error fetching term trend graph:', error);
-                    document.getElementById('graph-container').innerText = 'No data available.';
-                });
+                // Append the image to the term trend graph container
+                document.getElementById('term-trend-graph').appendChild(img);
+    
+                // Scroll to the bottom of the term graph container
+                scrollToBottom();
+    
+                // Make the "Show/Hide Term Trend Graph" button visible
+                document.getElementById('toggle-term-graph-btn').style.display = 'inline-block';
+            })
+
         });
     
-        // Define the scrollToBottom function to scroll the graph container to the bottom
+        // Define the scrollToBottom function to scroll the term trend graph container to the bottom
         function scrollToBottom() {
-            const container = document.getElementById('graph-container');
+            const container = document.getElementById('term-trend-graph');
             container.scrollTop = container.scrollHeight; // Scroll to the bottom
         }
+    
+        // Event listener for the "Show/Hide Term Trend Graph" button
+        document.getElementById("toggle-term-graph-btn").addEventListener("click", function () {
+            const termGraphContainer = document.getElementById('term-graph-container');
+            const toggleButton = document.getElementById('toggle-term-graph-btn');
+    
+            // Toggle the display of the term graph container
+            if (termGraphContainer.style.display === "none") {
+                termGraphContainer.style.display = "block";
+                toggleButton.textContent = "Hide Term Trend Graph";
+            } else {
+                termGraphContainer.style.display = "none";
+                toggleButton.textContent = "Show Term Trend Graph";
+            }
+        });
     </script>
 
-
-    <!-- Function to scroll to the bottom of the graph container -->
+    <!-- scroll to the bottom of the graph script -->
     <script>
         function scrollToBottom() {
             const container = document.getElementById("graph-container");
             container.scrollTop = container.scrollHeight;
     </script>
 
-    <!-- Show feedback javascript -->
+    <!-- Show feedback script -->
     <script>
         function toggleFeedback() {
             const feedbackContent = document.getElementById("feedbackContent");
@@ -612,188 +986,779 @@
         }
     </script>
 
-    <!-- comment analysis javascript -->
+    <!-- Comment Analysis Script -->
     <script>
-        document.getElementById('viewDataBtn').addEventListener('click', function () {
-            updateTableColumns();
-        });
-    
-        function updateTableColumns() {
-            const commentType = document.getElementById('commentTypeFilter').value;
-            const tableHeader = document.getElementById('tableHeader');
-            const tableBody = document.getElementById('commentTableBody');
-    
-            // Clear existing rows
-            tableHeader.innerHTML = '';
-            tableBody.innerHTML = '';
-    
-            // Define columns based on selection
-            let columns = [];
-            if (commentType === 'both') {
-                columns = ['Instructor Comment', 'Course Comment', 'Term'];
-            } else if (commentType === 'instructor') {
-                columns = ['Instructor Comment', 'Term'];
-            } else if (commentType === 'course') {
-                columns = ['Course Comment', 'Term'];
+        function updateTableHeaders() {
+            const commentType = document.getElementById("commentTypeFilter").value;
+            const tableHeader = document.getElementById("tableHeader");
+        
+            tableHeader.innerHTML = ''; // Clear existing headers
+        
+            if (commentType === 'both' || commentType === 'instructor') {
+                tableHeader.innerHTML += `<th>Instructor Comment</th>`;
             }
-    
-            // Create new header cells
-            columns.forEach((col) => {
-                const th = document.createElement('th');
-                th.style.position = 'relative';
-                th.style.userSelect = 'none';
-                th.innerHTML = col + '<div class="resizer" style="position: absolute; right: 0; top: 0; width: 10px; height: 100%; cursor: col-resize; z-index: 1;"></div>';
-                tableHeader.appendChild(th);
-            });
-    
-            // Call your function to load data for the selected comment type
-            loadCommentsData();
+            if (commentType === 'both' || commentType === 'course') {
+                tableHeader.innerHTML += `<th>Course Comment</th>`;
+            }
+            tableHeader.innerHTML += `<th>Term</th>`;
+            tableHeader.innerHTML += `<th>Sentiment</th>`;
         }
-    
+        
+        // Fetch instructors by term
+        function fetchInstructorsByTerm() {
+            const term = document.getElementById("termFilter").value;
+        
+            if (term !== "All Terms" && term !== "") {
+                fetch(`/get-instructors-by-term/?term=${encodeURIComponent(term)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const instructorFilter = document.getElementById("instructorFilter");
+                        instructorFilter.innerHTML = '<option value="">All Instructors</option>'; // Reset options
+        
+                        if (data.instructors && data.instructors.length > 0) {
+                            data.instructors.forEach(instructor => {
+                                const option = document.createElement("option");
+                                option.value = instructor;
+                                option.textContent = instructor;
+                                instructorFilter.appendChild(option);
+                            });
+                        } else {
+                            console.warn('No instructors available for the selected term.');
+                            instructorFilter.innerHTML = '<option value="">No Instructors Available</option>';
+                        }
+        
+                        // Reset the course dropdown when the term changes
+                        document.getElementById("courseFilter").innerHTML = '<option value="">All Courses</option>';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching instructors:', error);
+                        alert('An error occurred while fetching instructors. Please try again.');
+                    });
+            } else {
+                document.getElementById("instructorFilter").innerHTML = '<option value="">All Instructors</option>';
+                document.getElementById("courseFilter").innerHTML = '<option value="">All Courses</option>';
+            }
+        }
+        
+        // Fetch courses by instructor
+        function fetchCoursesByInstructor() {
+            const term = document.getElementById("termFilter").value;
+            const instructor = document.getElementById("instructorFilter").value;
+        
+            if (instructor !== "" && term !== "All Terms" && term !== "") {
+                fetch(`/get-courses-by-instructor/?term=${encodeURIComponent(term)}&instructor=${encodeURIComponent(instructor)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const courseFilter = document.getElementById("courseFilter");
+                        courseFilter.innerHTML = '<option value="">All Courses</option>'; // Reset options
+        
+                        if (data.courses && data.courses.length > 0) {
+                            data.courses.forEach(course => {
+                                const option = document.createElement("option");
+                                option.value = course;
+                                option.textContent = course;
+                                courseFilter.appendChild(option);
+                            });
+                        } else {
+                            console.warn('No courses available for the selected term and instructor.');
+                            courseFilter.innerHTML = '<option value="">No Courses Available</option>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching courses:', error);
+                        alert('An error occurred while fetching courses. Please try again.');
+                    });
+            } else {
+                document.getElementById("courseFilter").innerHTML = '<option value="">All Courses</option>';
+            }
+        }
+        
+        // Load comments based on selected filters
         function loadCommentsData() {
-            const term = document.getElementById('termFilter').value; // Get the term value
-            const commentType = document.getElementById('commentTypeFilter').value; // Get the comment type value
-            const sentiment = document.getElementById('sentimentFilter').value; // Get the sentiment value
-            const sortLength = document.getElementById('sortLengthFilter').value; // Get the sorting option
-    
-            // Construct the API URL with query parameters
-            const url = `/comments_table_view/?term=${term}&comment_type=${commentType}&sentiment=${sentiment}`;
-    
-            // Fetch data from the API
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    let comments = data.comments;
-    
-                    // Filter comments based on sentiment
-                    if (sentiment !== 'all') {
-                        comments = comments.filter(comment => comment.sentiment === sentiment);
-                    }
-    
-                    // Sort the comments based on the selected sorting option
-                    if (sortLength === 'longest') {
-                        comments.sort((a, b) => {
-                            const aLength = (a.question_31 || '').length + (a.question_32 || '').length;
-                            const bLength = (b.question_31 || '').length + (b.question_32 || '').length;
-                            return bLength - aLength;
+            const term = document.getElementById("termFilter").value;
+            const commentType = document.getElementById("commentTypeFilter").value;
+            const sentiment = document.getElementById("sentimentFilter").value;
+            const sortLength = document.getElementById("sortLengthFilter").value;
+            const instructor = document.getElementById("instructorFilter").value;
+            const course = document.getElementById("courseFilter").value;
+        
+            // Update table headers before loading comments
+            updateTableHeaders();
+        
+            const params = new URLSearchParams({
+                term: term === 'All Terms' ? '' : term,
+                comment_type: commentType,
+                sentiment: sentiment === 'all' ? '' : sentiment,
+                sort: sortLength === 'none' ? '' : sortLength,
+                instructor: instructor || '',
+                course: course || ''
+            });
+        
+            fetch(`/comments_table_view/?${params.toString()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            alert(data.error || 'An error occurred while loading comments.');
+                            throw new Error(data.error || 'Error fetching comments');
                         });
-                    } else if (sortLength === 'shortest') {
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const commentTableBody = document.getElementById("commentTableBody");
+                    commentTableBody.innerHTML = ''; // Clear existing data
+        
+                    let comments = data.comments;
+        
+                    // Sort comments based on the selected sort length
+                    if (sortLength === 'shortest') {
                         comments.sort((a, b) => {
-                            const aLength = (a.question_31 || '').length + (a.question_32 || '').length;
-                            const bLength = (b.question_31 || '').length + (b.question_32 || '').length;
+                            const aLength = (a.question_31 || a.question_32 || '').length;
+                            const bLength = (b.question_31 || b.question_32 || '').length;
                             return aLength - bLength;
                         });
+                    } else if (sortLength === 'longest') {
+                        comments.sort((a, b) => {
+                            const aLength = (a.question_31 || a.question_32 || '').length;
+                            const bLength = (b.question_31 || b.question_32 || '').length;
+                            return bLength - aLength;
+                        });
                     }
-    
-                    // Populate the table body with the sorted comments
-                    const tbody = document.querySelector('#commentTableBody');
-                    tbody.innerHTML = ''; // Clear the existing table content
-    
-                    comments.forEach(comment => {
-                        const row = document.createElement('tr');
-    
-                        // Conditionally create cells based on the selected comment type
-                        if (commentType === 'both' || commentType === 'instructor') {
-                            const instructorCommentCell = document.createElement('td');
-                            instructorCommentCell.textContent = comment.question_31 || 'N/A';
-                            row.appendChild(instructorCommentCell);
-                        }
-    
-                        if (commentType === 'both' || commentType === 'course') {
-                            const courseCommentCell = document.createElement('td');
-                            courseCommentCell.textContent = comment.question_32 || 'N/A';
-                            row.appendChild(courseCommentCell);
-                        }
-    
-                        // Always include the term column
-                        const termCell = document.createElement('td');
-                        termCell.textContent = comment.term || 'N/A';
-                        row.appendChild(termCell);
-    
-                        tbody.appendChild(row);
-                    });
-    
-                    // Show the table if there are comments to display
+        
+                    // Populate the table with comments
                     if (comments.length > 0) {
-                        document.getElementById('commentTable').style.display = 'table';
+                        comments.forEach(comment => {
+                            const row = document.createElement('tr');
+        
+                            // Set row color based on sentiment
+                            let rowColor = '';
+                            if (comment.sentiment === 'good') {
+                                rowColor = 'background-color: #d4edda;'; // Light green for positive
+                            } else if (comment.sentiment === 'bad') {
+                                rowColor = 'background-color: #f8d7da;'; // Light red for negative
+                            } else if (comment.sentiment === 'neutral') {
+                                rowColor = 'background-color: #fff3cd;'; // Light yellow for neutral
+                            }
+        
+                            row.setAttribute('style', rowColor);
+        
+                            // Add columns for instructor and course comments if applicable
+                            if (commentType === 'both' || commentType === 'instructor') {
+                                row.innerHTML += `<td>${comment.question_31 || ''}</td>`;
+                            }
+                            if (commentType === 'both' || commentType === 'course') {
+                                row.innerHTML += `<td>${comment.question_32 || ''}</td>`;
+                            }
+        
+                            // Add term and sentiment columns
+                            row.innerHTML += `<td>${comment.term || ''}</td>`;
+                            row.innerHTML += `<td>${comment.sentiment || ''}</td>`;
+        
+                            commentTableBody.appendChild(row);
+                        });
+        
+                        // Show the table after loading data
+                        document.getElementById("commentTable").style.display = 'table';
                     } else {
-                        document.getElementById('commentTable').style.display = 'none';
+                        commentTableBody.innerHTML = '<tr><td colspan="4">No comments found.</td></tr>';
+                        document.getElementById("commentTable").style.display = 'table';
                     }
                 })
-                .catch(error => console.error('Error fetching data:', error));
+                .catch(error => {
+                    console.error('Error fetching comments:', error);
+                });
+        }
+ 
+        // Function to download the comments table along with filter details as an Excel file
+        function downloadCommentsAsExcel() {
+            const table = document.getElementById('commentTable');
+            if (!table || table.style.display === 'none') {
+                alert('No comments available to download.');
+                return;
+            }
+    
+            // Get selected filter values
+            const term = document.getElementById('termFilter').value || 'All Terms';
+            const commentType = document.getElementById('commentTypeFilter').value || 'Both';
+            const sentiment = document.getElementById('sentimentFilter').value || 'All';
+            const instructor = document.getElementById('instructorFilter').value || 'All Instructors';
+            const course = document.getElementById('courseFilter').value || 'All Courses';
+    
+            // Create an array to store filter information
+            const filterData = [
+                ['Selected Filters'],
+                [`Term: ${term}`],
+                [`Comment Type: ${commentType}`],
+                [`Sentiment: ${sentiment}`],
+                [`Instructor: ${instructor}`],
+                [`Course: ${course}`],
+                [],
+                ['Comments Table Data']
+            ];
+    
+            // Extract table data
+            const tableData = [];
+            const rows = table.querySelectorAll('tr');
+    
+            rows.forEach((row) => {
+                const rowData = [];
+                const cells = row.querySelectorAll('th, td');
+                cells.forEach((cell) => {
+                    rowData.push(cell.textContent.trim());
+                });
+                tableData.push(rowData);
+            });
+    
+            // Combine filter data and table data
+            const combinedData = filterData.concat(tableData);
+    
+            // Create a worksheet and a workbook
+            const worksheet = XLSX.utils.aoa_to_sheet(combinedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Comments');
+    
+            // Export the workbook to an Excel file
+            XLSX.writeFile(workbook, 'comments_analysis_with_filters.xlsx');
         }
     
-        // Event listener for the filters
-        document.getElementById('commentTypeFilter').addEventListener('change', updateTableColumns);
-        document.getElementById('sentimentFilter').addEventListener('change', loadCommentsData);
-        document.getElementById('termFilter').addEventListener('change', loadCommentsData);
-        document.getElementById('sortLengthFilter').addEventListener('change', loadCommentsData);
-    </script>
+        // Event listener for the download button
+        document.getElementById('downloadCommentsExcelBtn').addEventListener('click', downloadCommentsAsExcel);
+    
 
+        // Event listeners to load data when term or instructor is selected
+        document.getElementById("termFilter").addEventListener("change", fetchInstructorsByTerm);
+        document.getElementById("instructorFilter").addEventListener("change", fetchCoursesByInstructor);
+        document.getElementById("viewDataButtonComments").addEventListener("click", loadCommentsData);
+        document.getElementById("commentTypeFilter").addEventListener("change", updateTableHeaders); // Update headers on change
+        document.getElementById('downloadCommentsPdfBtn').addEventListener('click', downloadCommentsAsPDF);
+
+    </script>
+    
+
+    <!-- Instructor Ranking Script -->
     <script>
         $(document).ready(function() {
+            // Load Graph Button Functionality
             $('#loadGraphButton').click(function() {
                 const deptName = $('#deptFilter').val();
-                const term = $('#termFilter').val();
-                
-                // Debugging: Log the selected filters
+                const term = $('#termFilter2').val();  // Updated ID for term filter
+    
                 console.log("Department Selected:", deptName);
                 console.log("Term Selected:", term);
-                
-                $.get('/api/instructor-ranking-graph/', { dept_name: deptName, survey_name: term }, function(data) {
+    
+                $.get('/api/instructor-ranking-graph/', { dept_name: deptName, term_selected: term }, function(data) {
                     console.log("API Response:", data);
-                    
-                    if (term === '23.24.1T | College Faculty Performance Evaluation' || term === '2T.23.24 | College Faculty Performance Evaluation') {
-                        // Hide the graph and show the table
-                        $('#instructorRankingGraph').hide();
-                        $('#instructorRankingTable').show().html(data.table); // Assuming data.table contains your HTML table
+    
+                    if (data.graph) {
+                        $('#instructorRankingTable').hide();  // Hide the table
+                        $('#instructorRankingGraph').attr('src', data.graph).show();  // Show the graph
                     } else {
-                        // Show the graph if all terms are selected
+                        alert(data.message || 'No data available for the selected filters.');
+                        $('#instructorRankingGraph').hide();
                         $('#instructorRankingTable').hide();
-                        $('#instructorRankingGraph').attr('src', data.graph).show();
                     }
                 }).fail(function() {
                     alert('Error fetching data. Please try again.');
                 });
             });
+    
+            // Clear Filters Button Functionality
+            $('#clearFiltersButton').click(function() {
+                $('#deptFilter').prop('selectedIndex', 0);
+                $('#termFilter2').prop('selectedIndex', 0);
+                $('#instructorRankingGraph').attr('src', '').hide();
+                $('#instructorRankingTable').hide();
+    
+                console.log("Filters cleared and graph container reset.");
+            });
+    
+            // Function to download the instructor graph as a PDF
+            window.downloadInstructorGraphAsPDF = function() {
+                const graphContainer = document.getElementById('instructorRankingGraph');
+    
+                if (graphContainer && graphContainer.style.display !== 'none' && graphContainer.src) {
+                    html2canvas(graphContainer).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF({
+                            orientation: 'portrait',
+                            unit: 'px',
+                            format: 'a4'
+                        });
+    
+                        const pageWidth = pdf.internal.pageSize.getWidth();
+                        const imgWidth = pageWidth - 40; // 20px margin on both sides
+                        const aspectRatio = canvas.width / canvas.height;
+                        const imgHeight = imgWidth / aspectRatio;
+    
+                        pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+                        pdf.save('instructor_ranking_graph.pdf');
+                    }).catch(error => {
+                        console.error('Error capturing the graph:', error);
+                        alert('Failed to generate PDF. Please try again.');
+                    });
+                } else {
+                    alert('No graph available to download. Please generate a graph first.');
+                }
+            };
         });
     </script>
 
+    <!-- Department Script -->
     <script>
-        $(document).ready(function() {
-            $('#view-data-btn-CAS').on('click', function() {
-                $.ajax({
-                    url: '{% url "plot_average_ratings_CAS" %}',  // Ensure this is pointing to the correct view
-                    method: 'GET',
-                    success: function(response) {
-                        // Handle successful data retrieval (render graph, etc.)
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 403) {
-                            alert(xhr.responseJSON.error);  // Display error message
-                        } else {
-                            alert('An unexpected error occurred.');
+        // Function to toggle the visibility of the summary section
+        function toggleSummary() {
+            const summaryElement = document.getElementById('graph-summary');
+            const toggleButton = document.getElementById('toggle-summary-btn');
+    
+            if (summaryElement.style.display === "none") {
+                summaryElement.style.display = "block";
+                toggleButton.textContent = "Hide Feedback";
+            } else {
+                summaryElement.style.display = "none";
+                toggleButton.textContent = "Show Feedback";
+            }
+        }
+
+    
+// Function to render the graph for single-department and comparison graphs
+function renderDepartmentGraph(data, isComparison = false) {
+    const ctx = document.getElementById('averageRatingsChart').getContext('2d');
+
+    // Display the selected department name at the top as an <h6> element with overall score information
+    const departmentLabel = document.getElementById('department-graph-header');
+    const selectedDepartmentName = document.getElementById('department').options[document.getElementById('department').selectedIndex].text;
+
+    // Calculate overall score
+    const categories = Object.keys(data.breakdown);
+    const overallScore = (categories.reduce((sum, category) => sum + parseFloat(data.breakdown[category].Average), 0) / categories.length).toFixed(2);
+
+    departmentLabel.innerHTML = `<h6>Department: ${selectedDepartmentName} | Overall Score: ${overallScore}</h6>`;
+    departmentLabel.style.display = "block";
+
+    // Destroy the old chart instance if it exists to avoid overlapping graphs
+    if (window.myChart) {
+        window.myChart.destroy();
+    }
+
+    // Parse data received from the server
+    const averages = categories.map(category => parseFloat(data.breakdown[category].Average));
+    const breakdown = data.breakdown;
+
+    const colors = averages.map(avg => {
+        if (avg < 1.00) return 'red'; // Weakness
+        else if (avg <= 2.49) return 'orange'; // Weakness
+        else if (avg <= 3.99) return '#9ACD32'; // Neutral
+        else return 'green'; // Strength
+    });
+
+    // Only analyze strengths, neutral, and weaknesses if it's not a comparison graph
+    if (!isComparison) {
+        let strengths = [];
+        let neutral = [];
+        let weaknesses = [];
+
+        categories.forEach((category, index) => {
+            const average = averages[index];
+            if (average >= 4.00 && average <= 5.00) {
+                strengths.push(category);
+            } else if (average >= 2.50 && average < 4.00) {
+                neutral.push(category);
+            } else if (average >= 1.00 && average < 2.50) {
+                weaknesses.push(category);
+            }
+        });
+
+        // Display strengths and weaknesses in the summary section if not a comparison graph
+        const summaryElement = document.getElementById('graph-summary');
+        summaryElement.style.display = "block";  // Ensure it's displayed initially
+        summaryElement.innerHTML = `
+            <h3>Summary of Strengths, Neutral, and Weaknesses</h3>
+            <p><strong>Strengths:</strong> ${strengths.length > 0 ? strengths.join(', ') : 'None'}</p>
+            <p><strong>Neutral:</strong> ${neutral.length > 0 ? neutral.join(', ') : 'None'}</p>
+            <p><strong>Weaknesses:</strong> ${weaknesses.length > 0 ? weaknesses.join(', ') : 'None'}</p>
+        `;
+    } else {
+        // If it's a comparison graph, clear the summary section
+        document.getElementById('graph-summary').innerHTML = '';
+    }
+
+    // Create the Chart.js bar chart
+    window.myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: [{
+                data: averages,
+                backgroundColor: colors
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        // Display the breakdown information in the tooltip
+                        label: function (context) {
+                            const category = context.label;
+                            const average = breakdown[category].Average;
+                            const details = breakdown[category].Details;
+
+                            // Create an array for lines in the tooltip
+                            let tooltipLines = [`Category: ${category}`, `Average: ${average}`, '', 'Questions:'];
+
+                            // Add each question and its score as a new line in the tooltip
+                            for (let question in details) {
+                                tooltipLines.push(`${question}: ${details[question]}`);
+                            }
+
+                            // Return the array of lines
+                            return tooltipLines;
                         }
                     }
-                });
+                },
+                legend: {
+                    display: false // Disable the legend display
+                }
+            }
+        }
+    });
+}
+
+// Fetch and render the graph when the "View Data" button is clicked
+document.getElementById("view-data-btn").addEventListener("click", function () {
+    const selectedGraph = document.getElementById("department").value;
+
+    // Check if the selected option is a comparison graph
+    const isComparison = selectedGraph.startsWith('compare_');
+
+    // Construct the URL dynamically based on user selection
+    const url = isComparison ? `/compare/${selectedGraph.replace('_', '-')}/` : `/plot_average_ratings_${selectedGraph}/`;
+
+    // Clear the previous graph container content
+    document.getElementById('graph-container').innerHTML = '';
+
+    // Fetch data for the selected graph
+    $.ajax({
+        url: url,  // Dynamic URL for selected graph
+        method: 'GET',
+        success: function(response) {
+            // Check for a valid response structure before proceeding
+            if (response && response.breakdown) {
+                try {
+                    // Render the graph if everything is correct
+                    renderDepartmentGraph(response, isComparison);
+                } catch (error) {
+                    console.error("Error rendering graph:", error);
+                }
+            } else {
+                console.error("Unexpected response format:", response);
+            }
+        },
+        error: function(xhr) {
+            if (xhr.status === 403) {
+                alert(xhr.responseJSON.error);
+            } else {
+                console.error("Request failed:", xhr);
+            }
+        }
+    });
+});
+    </script>
+
+    <!-- department comparison cript -->
+    <script>
+        // Function to fetch and render data for comparison URLs
+        function fetchAndRenderComparison(selectedComparison) {
+            // Construct the comparison URL dynamically based on user selection
+            const comparisonUrl = `/compare/${selectedComparison.replace('_', '-')}/`;
+    
+            // Clear the previous comparison graph container content if needed
+            const comparisonContainer = document.getElementById('graph-container');
+            if (comparisonContainer) {
+                comparisonContainer.innerHTML = '';
+            }
+    
+            // Fetch data for the selected comparison
+            $.ajax({
+                url: comparisonUrl,  // Dynamic URL for the selected comparison
+                method: 'GET',
+                success: function(response) {
+                    // Call a function to render the comparison graph with the fetched data
+                    renderComparisonGraph(response, selectedComparison);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        alert(xhr.responseJSON.error);
+                    } else {
+                        console.error("Error fetching comparison data:", xhr);
+                    }
+                }
             });
-        
-            $('#view-data-btn-ATYCB').on('click', function() {
-                $.ajax({
-                    url: '{% url "plot_average_ratings_ATYCB" %}',  // Ensure this is pointing to the correct view
-                    method: 'GET',
-                    success: function(response) {
-                        // Handle successful data retrieval (render graph, etc.)
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 403) {
-                            alert(xhr.responseJSON.error);  // Display error message
-                        } else {
-                            alert('An unexpected error occurred.');
+        }
+    
+        // Function to render the comparison graph
+        function renderComparisonGraph(data, selectedComparison) {
+            const ctx = document.getElementById('averageRatingsChart').getContext('2d');
+    
+            // Destroy the old chart instance if it exists to avoid overlapping graphs
+            if (window.myChart) {
+                window.myChart.destroy();
+            }
+    
+            // Parse data received from the server
+            const categories = Object.keys(data.breakdown);
+    
+            // Determine department labels dynamically based on selected comparison
+            const [dept1Label, dept2Label] = selectedComparison.replace('compare_', '').split('_').map(dept => dept.toUpperCase());
+    
+            // Extract average values for each department
+            const averagesDept1 = categories.map(category => parseFloat(data.breakdown[category][`${dept1Label}_Average`]));
+            const averagesDept2 = categories.map(category => parseFloat(data.breakdown[category][`${dept2Label}_Average`]));
+            const breakdown = data.breakdown;
+    
+            // Create the Chart.js bar chart with side-by-side bars for both departments
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [
+                        {
+                            label: dept1Label,
+                            data: averagesDept1,
+                            backgroundColor: '#007300'  // Green for Dept 1
+                        },
+                        {
+                            label: dept2Label,
+                            data: averagesDept2,
+                            backgroundColor: '#fb8500'  // Orange for Dept 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                // Display the breakdown information in the tooltip
+                                label: function (context) {
+                                    const category = context.label;
+                                    const dept = context.dataset.label;
+                                    const average = dept === dept1Label ? breakdown[category][`${dept1Label}_Average`] : breakdown[category][`${dept2Label}_Average`];
+                                    const details = breakdown[category].Details[dept];
+    
+                                    // Create an array for lines in the tooltip
+                                    let tooltipLines = [`Category: ${category}`, `Department: ${dept}`, `Average: ${average}`, '', 'Questions:`'];
+    
+                                    // Add each question and its score as a new line in the tooltip
+                                    for (let question in details) {
+                                        tooltipLines.push(`${question}: ${details[question]}`);
+                                    }
+    
+                                    // Return the array of lines
+                                    return tooltipLines;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: true  // Enable legend display to differentiate departments
                         }
                     }
-                });
+                }
             });
+        }
+    
+        // Event listener for fetching comparison data
+        document.getElementById("view-data-btn").addEventListener("click", function () {
+            const selectedComparison = document.getElementById("department").value;
+            fetchAndRenderComparison(selectedComparison);
         });
     </script>
+
+    <!-- instructor script top graph -->
+ <script>
+    // Function to determine color based on average rating
+    function getColor(value) {
+        if (value < 1) {
+            return 'red';
+        } else if (value < 2.49) {
+            return 'orange';
+        } else if (value < 3.99) {
+            return '#9ACD32';
+        } else {
+            return 'green';
+        }
+    }
+    
+    // Function to toggle the visibility of the graph
+    function toggleGraphVisibility() {
+        const graphContainer = document.getElementById('instructor-graph-container');
+        const instructorName = document.getElementById("instructor-name");
+        const toggleButton = document.getElementById('toggle-graph-btn');
+    
+        if (graphContainer.style.display === "none") {
+            graphContainer.style.display = "block";
+            instructorName.style.display = "block";
+            toggleButton.textContent = "Hide Instructor Graph";
+        } else {
+            graphContainer.style.display = "none";
+            instructorName.style.display = "none";
+            toggleButton.textContent = "Show Instructor Graph";
+        }
+    }
+    
+    // Function to render the instructor graph using Chart.js
+    function renderInstructorGraph(data, instructorLabel) {
+        const ctx = document.getElementById('instructorRatingsChart').getContext('2d');
+    
+        // Calculate overall score
+        const categories = Object.keys(data.breakdown);
+        const overallScore = (categories.reduce((sum, category) => sum + parseFloat(data.breakdown[category].Average), 0) / categories.length).toFixed(2);
+    
+        // Display the instructor name and overall score as a label at the top
+        const instructorLabelElement = document.getElementById('instructor-name');
+        instructorLabelElement.innerHTML = `<h6>Instructor: ${instructorLabel} | Overall Score: ${overallScore}</h6>`;
+        instructorLabelElement.style.display = "block";
+    
+        // Destroy the old chart instance if it exists to avoid overlapping graphs
+        if (window.myInstructorChart) {
+            window.myInstructorChart.destroy();
+        }
+    
+        // Extract averages from the response data
+        const averages = categories.map(category => parseFloat(data.breakdown[category].Average));
+        const breakdown = data.breakdown;
+    
+        // Generate colors for each category based on average rating
+        const colors = averages.map(avg => getColor(avg));
+    
+        // Create the Chart.js bar chart
+        window.myInstructorChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: `Average Rating`,
+                    data: averages,
+                    backgroundColor: colors
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            // Display the breakdown information in the tooltip
+                            label: function (context) {
+                                const category = context.label;
+                                const average = breakdown[category].Average;
+                                const details = breakdown[category].Details;
+    
+                                // Create an array for lines in the tooltip
+                                let tooltipLines = [`Category: ${category}`, `Average: ${average}`, '', 'Questions:'];
+    
+                                // Add each question and its score as a new line in the tooltip
+                                for (let question in details) {
+                                    tooltipLines.push(`${question}: ${details[question]}`);
+                                }
+    
+                                // Return the array of lines
+                                return tooltipLines;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false // Disable the legend display
+                    }
+                }
+            }
+        });
+    }
+    
+    // Event listener for "View Data" button
+    document.getElementById("view-data-btn").addEventListener("click", function () {
+        const instructorSelect = document.getElementById("instructor");
+        const instructorName = instructorSelect.value;
+        const instructorLabel = instructorSelect.options[instructorSelect.selectedIndex].text;
+    
+        // Construct the URL dynamically based on the selected instructor
+        const url = `/plot_instructor_ratings/${instructorName}/`;
+    
+        // Fetch the breakdown data for the selected instructor graph
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Received data from server:", data);  // Log received data
+            if (data && data.breakdown) {
+                renderInstructorGraph(data, instructorLabel);
+            } else {
+                console.error("Unexpected response format:", data);
+                alert("Unexpected response format received.");
+            }
+        })
+
+    });
+    
+    // Event listener for "Toggle Graph" button
+    document.getElementById("toggle-graph-btn").addEventListener("click", toggleGraphVisibility);
+</script>
+    
+    <!-- clearing filters script -->
+    <script>
+        document.getElementById('clear-filters-btn').addEventListener('click', function () {
+            // Reset each select element to the first option (default)
+            document.getElementById('department').selectedIndex = 0;
+            document.getElementById('instructor').selectedIndex = 0;
+            document.getElementById('term').selectedIndex = 0;
+            document.getElementById('course').selectedIndex = 0; // Reset the course dropdown as well
+    
+            // Clear the graph containers
+            document.getElementById('graph-container').innerHTML = '';
+            document.getElementById('instructor-graph-container').innerHTML = '';
+            document.getElementById('average-rating-graph-container').innerHTML = '';
+            document.getElementById('term-trend-graph').innerHTML = '';
+            document.getElementById('course-graph-container').style.display = 'none'; // Hide course graph container
+    
+            // Destroy the course chart instance if it exists
+            if (window.courseChart) {
+                window.courseChart.destroy();
+                window.courseChart = null; // Reset the chart instance variable
+            }
+    
+            // Hide any displayed graph summaries or instructor information
+            document.getElementById('graph-summary').innerHTML = '';
+            document.getElementById('instructor-name').textContent = '';
+    
+            // Clear the department graph header and hide it if it exists
+            const departmentHeader = document.getElementById('selected-department-name');
+            const departmentHeaderContainer = document.getElementById('department-graph-header');
+            
+            if (departmentHeader) {
+                departmentHeader.textContent = '';
+                console.log("Cleared department header text.");
+            } else {
+                console.warn("Element with ID 'selected-department-name' not found.");
+            }
+    
+            if (departmentHeaderContainer) {
+                departmentHeaderContainer.style.display = 'none'; // Ensure the header is hidden
+                console.log("Department graph header hidden.");
+            } else {
+                console.warn("Element with ID 'department-graph-header' not found.");
+            }
+    
+            // Log actions for debugging
+            console.log("Filters cleared, graph containers reset.");
+        });
+    </script>
+
 {% endblock %}

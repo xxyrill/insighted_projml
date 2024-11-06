@@ -27,15 +27,23 @@ urlpatterns = [
     path('compare/cea-nstp/', views.cea_nstp_comparison_view, name='cea_nstp_comparison'),
     path('compare/chs-nstp/', views.chs_nstp_comparison_view, name='chs_nstp_comparison'),
     
+    path('get-courses-for-instructor/', views.get_courses_for_instructor, name='get_courses_for_instructor'),
+    path('plot-average-ratings-by-course/', views.plot_average_ratings_by_course, name='plot_average_ratings_by_course'),
+
+    path('get-instructors-by-term/', views.get_instructors_by_term, name='get_instructors_by_term'),
+    path('get-courses-by-instructor/', views.get_courses_by_instructor, name='get_courses_by_instructor'),
+    
     path('comments_table_view/', views.comments_table_view, name='comments_table_view'),
 
-    
     path('api/instructor-ranking-graph/', views.instructor_ranking_graph, name='instructor-ranking-graph'),
     
     path('plot_instructor_ratings/<str:instructor_name>/', views.plot_instructor_ratings, name='plot_instructor_ratings'),
     path('plot_term_1/', views.plot_term_1, name='plot_term_1'),
     path('plot_term_2/', views.plot_term_2, name='plot_term_2'),
+    path('plot_term_3/', views.plot_term_3, name='plot_term_3'),
     path('plot_all_terms/',views.plot_all_terms, name='plot_all_terms'),
     
  
 ]
+
+

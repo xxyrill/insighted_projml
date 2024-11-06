@@ -8,8 +8,10 @@ class CustomUser(AbstractUser):
         ('VPAA', 'Vice President of Academic Affairs'),
         ('IDEALS', 'Ideals'),
         ('QAEO', 'QAEO'),
+        ('HR', 'HR'),
         ('DEANS', 'Deans'),  # Single 'DEANS' type for general dean role
         ('ATYCB', 'ATYCB Dean'),
+        ('CHS', 'CHS Dean'),
         ('CAS', 'CAS Dean'),
         ('CEA', 'CEA Dean'),
         ('CCIS', 'CCIS Dean'),
@@ -21,6 +23,7 @@ class CustomUser(AbstractUser):
         return self.username
 
 class UploadCSV (models.Model):
+    
     survey_name = models.CharField(max_length=255)
     term = models.CharField(max_length=10, default='Unknown')
     date_start = models.CharField(max_length=255)
@@ -51,164 +54,164 @@ class UploadCSV (models.Model):
     question_1 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor has set clear standards regarding '
                   'their timeliness in responding to messages.')
     question_2 = models.IntegerField(validators=[
         MinValueValidator(-1),
-        MaxValueValidator(5)
-    ], default=0,
+        MaxValueValidator(5),
+    ], default=0, null=True, blank=True,
         help_text='The instructor has provided the appropriate information and contact details for technical concerns.')
     question_3 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor showed interest in student progress.')
     # II. Collaborative Learning
     question_4 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor encourages learners to participate.')
     question_5 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor implements Small Group Discussions (Breakout Rooms).')
     question_6 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides equal opportunities for students to share ideas and viewpoints.')
     question_7 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor requires learners to participate.')
     question_8 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides platforms for Small Group Discussions.')
     question_9 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='Tasks deployed require collaboration among students.')
     # III. Active Learning
     question_10 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor interactively engages learners in a variety of instructional delivery methods.')
     question_11 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
-        help_text='The instructor deploys various active learning techniques (role-playing  case studies  group projects  think-pair-share  debates  etc.)')
+    ], default=0, null=True, blank=True,
+        help_text='The instructor deploys various active learning techniques (role-playing , case studies, etc.)') # SHORTENED SO THAT HOVER WILL DISPLAY AVERAGE SCORE
     question_12 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides students access to resources that enrich the course content.')
     # IV. Content Knowledge and Proficiency
     question_13 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor demonstrates a thorough knowledge of the subject matter.')
     question_14 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides examples  case studies  or problem sets that required higher-order thinking skills.')
     question_15 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor explains the significance of the lessons.')
     # V. Course Expectations
     question_16 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='Tasks and assessments increase their level of challenge.')
     question_17 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides examples or models of what is expected.')
     question_18 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='Course outcomes are clearly presented.')
     # VI. Clarity/Instructions
     question_19 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='Course deadlines are clearly set.')
     question_20 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='Provides reminders regarding upcoming deadlines.')
     question_21 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides clear guidelines and/or rubrics of the learning activities.')
     # VII. Feedback
     question_22 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
-        help_text='The instructor provides Information Feedback (Evaluation of Work  Answers to Questions  Comments on Submissions).')
+    ], default=0, null=True, blank=True,
+        help_text='The instructor provides Information Feedback (Evaluation of Work, Answers to Questions, etc.).')
     question_23 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides Acknowledgment Feedback (acknowledges communication sent by student).')
     question_24 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor returns assessments in a timely fashion.')
     # VIII. Inclusivity
     question_25 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor engages students in learning activities that address a variety of learning styles and preferences.')
     question_26 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
-        help_text='The instructor adapts learning activities to accommodate student&#39s needs.')
+    ], default=0, null=True, blank=True,
+        help_text='The instructor adapts learning activities to accommodate students needs.')
     question_27 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='Quality of work is praised.')
     # IX. Outcome-Based Education
     question_28 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
-        help_text='The instructor is effective in helping students develop their knowledge  skills  and personalities enabling them to achieve the intended learning outcomes.')
+    ], default=0, null=True, blank=True,
+        help_text='Instructor is effective in helping students develop their knowledge, skills, & personalities.')
     question_29 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='Course assessments are authentic and measure Higher-Order Thinking Skills.')
     question_30 = models.IntegerField(validators=[
         MinValueValidator(-1),
         MaxValueValidator(5)
-    ], default=0,
+    ], default=0, null=True, blank=True,
         help_text='The instructor provides sufficient attempts in the attainment of learning outcomes.')
-    question_31 = models.CharField(max_length=255)
-    question_32 = models.CharField(max_length=255)
+    question_31 = models.CharField(max_length=255, null=True, blank=True)
+    question_32 = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return (f"Survey: {self.survey_name}, "

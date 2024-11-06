@@ -1,26 +1,87 @@
-<!-- templates/register.html -->
 {% extends 'components/layouts.html' %}
-{% block content %}
-<div class="container">
-    <h2>Create Account</h2>
-    
-    <!-- Display any success or error messages -->
-    {% if messages %}
-        <div id="message-container">
-            {% for message in messages %}
-                <div class="alert alert-success">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
+{% block content %}>
 
-    <!-- Registration Form -->
-    <form method="POST" action="">
-        {% csrf_token %}
-        <!-- Render all form fields -->
-        {{ form.as_p }}
-
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-success">Create Account</button>
-    </form>
+<!-- Toast message container -->
+<div id="toast-container" class="toast-container" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: none; min-width: 250px;">
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 0 auto;">
+        <span id="toast-message"></span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick="hideToast()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
 </div>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h4 class="mb-4 text-center">Create Account</h4>
+            <!-- Registration Form -->
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                    {% if form.username.help_text %}
+                        <small class="form-text text-muted">{{ form.username.help_text }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ form.password1.label_tag }}
+                    {{ form.password1 }}
+                    {% if form.password1.help_text %}
+                        <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    {{ form.password2.label_tag }}
+                    {{ form.password2 }}
+                    {% if form.password2.help_text %}
+                        <small class="form-text text-muted">{{ form.password2.help_text }}</small>
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-4">
+                    {{ form.user_type.label_tag }}
+                    {{ form.user_type }}
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Create Account</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to show and auto-hide the toast -->
+<script>
+    function showToast(message, duration = 10000) {
+        const toastContainer = document.getElementById('toast-container');
+        const toastMessage = document.getElementById('toast-message');
+
+        // Ensure the message does not wrap and appears in one line
+        toastMessage.textContent = message;
+        toastMessage.style.whiteSpace = 'nowrap';
+        toastContainer.style.display = 'block';
+
+        // Automatically hide the toast after the specified duration
+        setTimeout(() => {
+            hideToast();
+        }, duration);
+    }
+
+    function hideToast() {
+        document.getElementById('toast-container').style.display = 'none';
+    }
+
+    // Display the toast if there are Django messages
+    window.onload = function() {
+        {% if messages %}
+        {% for message in messages %}
+        showToast('{{ message }}', 3000);
+        {% endfor %}
+        {% endif %}
+    };
+</script>
+
 {% endblock %}

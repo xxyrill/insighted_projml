@@ -2,7 +2,7 @@
 :root {
   --header-height: 3rem;
   --nav-width: 68px;
-  --first-color: #4723d9;
+  --first-color: #1D325E;
   --first-color-light: #afa5d9;
   --white-color: #f7f6fb;
   --body-font: "Nunito", sans-serif;
@@ -61,7 +61,7 @@ a {
   left: -30%;
   width: var(--nav-width);
   height: 100vh;
-  background-color: var(--first-color);
+  background-color: #1D325E;
   padding: 0.5rem 1rem 0 0;
   transition: 0.5s;
   z-index: var(--z-fixed);
