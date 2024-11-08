@@ -79,6 +79,7 @@ def upload_csv_to_db(csv_file_path):
     print("Unique Survey Name:", term)
     
     return departments, instructors, courses, term
+
 def dashboard_view(request):
     user_role = request.user.user_type  # Assuming user_type stores department or role information
     # Roles with access to all departments
@@ -102,6 +103,7 @@ def dashboard_view(request):
         'messages': messages.get_messages(request),  # If you have messages
     }
     return render(request, 'dashboard/dashboard.html', context)
+
 def generate_graph(request):
     # Logic for generating the graph based on request data
     graph_type = request.GET.get('graph', 'default_graph')
@@ -113,6 +115,7 @@ def generate_graph(request):
     # Add logic for other graphs as needed
     # Convert image to base64 for frontend display
     img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    
     return JsonResponse({'image': img_base64}, safe=False)
 
 def get_unique_filter_options():
@@ -125,6 +128,7 @@ def get_unique_filter_options():
     courses = data['crs_name'].dropna().unique()  # Assuming 'crs_name' is the column name for Courses
     term = data['survey_name'].dropna().unique()  # Assuming 'crs_name' is the column name for Term
     return departments, instructors, courses
+
 def render_filter_page(request):
     """View to render the filter page with populated dropdowns for Department, Instructor, and Courses."""
     # Get the unique filter options
@@ -137,6 +141,7 @@ def render_filter_page(request):
         'term': term
     }
     return render(request, 'dashboard.html', context)
+
 def get_courses_for_instructor(request):
     instructor = request.GET.get('instructor')
     
@@ -146,7 +151,6 @@ def get_courses_for_instructor(request):
         return JsonResponse({'courses': courses})
     
     return JsonResponse({'courses': []})
-
 
 #4. Pie Chart Comments
 nltk.download('stopwords')

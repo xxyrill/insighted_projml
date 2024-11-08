@@ -15,10 +15,10 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.shortcuts import render, redirect
-from .forms import CustomUserCreationForm  # Import your form from forms.py
+from .forms import CustomUserCreationForm 
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import CustomUserCreationForm  # Import your custom form
+from .forms import CustomUserCreationForm
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
